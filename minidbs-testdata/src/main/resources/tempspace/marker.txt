@@ -1,0 +1,4 @@
+# ------------------------------------------------------------------
+#  Marker file. Prevents this otherwise initially empty directory
+#  from being deleted by various archive and versioning tools.
+# ------------------------------------------------------------------

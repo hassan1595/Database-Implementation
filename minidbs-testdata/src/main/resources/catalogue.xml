@@ -1,0 +1,1419 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<java version="1.6.0_20" class="java.beans.XMLDecoder"> 
+ <object class="de.tuberlin.dima.minidb.catalogue.beans.TableDescriptorBean"> 
+  <void property="statistics"> 
+   <object class="de.tuberlin.dima.minidb.catalogue.beans.TableStatisticsBean"> 
+    <void property="cardinality"> 
+     <long>5</long> 
+    </void> 
+    <void property="columnStatistics"> 
+     <array class="de.tuberlin.dima.minidb.catalogue.beans.ColumnStatisticsBean" length="3"> 
+      <void index="0"> 
+       <object class="de.tuberlin.dima.minidb.catalogue.beans.ColumnStatisticsBean"> 
+        <void property="cardinality"> 
+         <long>5</long> 
+        </void> 
+        <void property="highKeyString"> 
+         <string>4</string> 
+        </void> 
+        <void property="lowKeyString"> 
+         <string>0</string> 
+        </void> 
+       </object> 
+      </void> 
+      <void index="1"> 
+       <object class="de.tuberlin.dima.minidb.catalogue.beans.ColumnStatisticsBean"> 
+        <void property="cardinality"> 
+         <long>5</long> 
+        </void> 
+        <void property="columnIndex"> 
+         <int>1</int> 
+        </void> 
+        <void property="highKeyString"> 
+         <string>MIDDLE EAST              </string> 
+        </void> 
+        <void property="lowKeyString"> 
+         <string>AFRICA                   </string> 
+        </void> 
+       </object> 
+      </void> 
+      <void index="2"> 
+       <object class="de.tuberlin.dima.minidb.catalogue.beans.ColumnStatisticsBean"> 
+        <void property="cardinality"> 
+         <long>5</long> 
+        </void> 
+        <void property="columnIndex"> 
+         <int>2</int> 
+        </void> 
+        <void property="highKeyString"> 
+         <string>uickly special accounts cajole carefully blithely close requests. carefully final asymptotes haggle furiousl</string> 
+        </void> 
+        <void property="lowKeyString"> 
+         <string>ges. thinly even pinto beans ca</string> 
+        </void> 
+       </object> 
+      </void> 
+     </array> 
+    </void> 
+    <void property="numberOfPages"> 
+     <int>1</int> 
+    </void> 
+   </object> 
+  </void> 
+  <void property="tableFileName"> 
+   <string>region.mdtbl</string> 
+  </void> 
+  <void property="tableName"> 
+   <string>REGION</string> 
+  </void> 
+ </object> 
+ <object class="de.tuberlin.dima.minidb.catalogue.beans.TableDescriptorBean"> 
+  <void property="statistics"> 
+   <object class="de.tuberlin.dima.minidb.catalogue.beans.TableStatisticsBean"> 
+    <void property="cardinality"> 
+     <long>30000</long> 
+    </void> 
+    <void property="columnStatistics"> 
+     <array class="de.tuberlin.dima.minidb.catalogue.beans.ColumnStatisticsBean" length="9"> 
+      <void index="0"> 
+       <object class="de.tuberlin.dima.minidb.catalogue.beans.ColumnStatisticsBean"> 
+        <void property="cardinality"> 
+         <long>30000</long> 
+        </void> 
+        <void property="highKeyString"> 
+         <string>120000</string> 
+        </void> 
+        <void property="lowKeyString"> 
+         <string>1</string> 
+        </void> 
+       </object> 
+      </void> 
+      <void index="1"> 
+       <object class="de.tuberlin.dima.minidb.catalogue.beans.ColumnStatisticsBean"> 
+        <void property="cardinality"> 
+         <long>2000</long> 
+        </void> 
+        <void property="columnIndex"> 
+         <int>1</int> 
+        </void> 
+        <void property="highKeyString"> 
+         <string>2999</string> 
+        </void> 
+        <void property="lowKeyString"> 
+         <string>1</string> 
+        </void> 
+       </object> 
+      </void> 
+      <void index="2"> 
+       <object class="de.tuberlin.dima.minidb.catalogue.beans.ColumnStatisticsBean"> 
+        <void property="cardinality"> 
+         <long>3</long> 
+        </void> 
+        <void property="columnIndex"> 
+         <int>2</int> 
+        </void> 
+        <void property="highKeyString"> 
+         <string>P</string> 
+        </void> 
+        <void property="lowKeyString"> 
+         <string>F</string> 
+        </void> 
+       </object> 
+      </void> 
+      <void index="3"> 
+       <object class="de.tuberlin.dima.minidb.catalogue.beans.ColumnStatisticsBean"> 
+        <void property="cardinality"> 
+         <long>29982</long> 
+        </void> 
+        <void property="columnIndex"> 
+         <int>3</int> 
+        </void> 
+        <void property="highKeyString"> 
+         <string>451578.1</string> 
+        </void> 
+        <void property="lowKeyString"> 
+         <string>913.01</string> 
+        </void> 
+       </object> 
+      </void> 
+      <void index="4"> 
+       <object class="de.tuberlin.dima.minidb.catalogue.beans.ColumnStatisticsBean"> 
+        <void property="cardinality"> 
+         <long>2406</long> 
+        </void> 
+        <void property="columnIndex"> 
+         <int>4</int> 
+        </void> 
+        <void property="highKeyString"> 
+         <string>1998-8-2</string> 
+        </void> 
+        <void property="lowKeyString"> 
+         <string>1992-1-1</string> 
+        </void> 
+       </object> 
+      </void> 
+      <void index="5"> 
+       <object class="de.tuberlin.dima.minidb.catalogue.beans.ColumnStatisticsBean"> 
+        <void property="cardinality"> 
+         <long>5</long> 
+        </void> 
+        <void property="columnIndex"> 
+         <int>5</int> 
+        </void> 
+        <void property="highKeyString"> 
+         <string>5-LOW          </string> 
+        </void> 
+        <void property="lowKeyString"> 
+         <string>1-URGENT       </string> 
+        </void> 
+       </object> 
+      </void> 
+      <void index="6"> 
+       <object class="de.tuberlin.dima.minidb.catalogue.beans.ColumnStatisticsBean"> 
+        <void property="cardinality"> 
+         <long>1000</long> 
+        </void> 
+        <void property="columnIndex"> 
+         <int>6</int> 
+        </void> 
+        <void property="highKeyString"> 
+         <string>Clerk#000001000</string> 
+        </void> 
+        <void property="lowKeyString"> 
+         <string>Clerk#000000001</string> 
+        </void> 
+       </object> 
+      </void> 
+      <void index="7"> 
+       <object class="de.tuberlin.dima.minidb.catalogue.beans.ColumnStatisticsBean"> 
+        <void property="cardinality"> 
+         <long>1</long> 
+        </void> 
+        <void property="columnIndex"> 
+         <int>7</int> 
+        </void> 
+        <void property="highKeyString"> 
+         <string>0</string> 
+        </void> 
+        <void property="lowKeyString"> 
+         <string>0</string> 
+        </void> 
+       </object> 
+      </void> 
+      <void index="8"> 
+       <object class="de.tuberlin.dima.minidb.catalogue.beans.ColumnStatisticsBean"> 
+        <void property="cardinality"> 
+         <long>29974</long> 
+        </void> 
+        <void property="columnIndex"> 
+         <int>8</int> 
+        </void> 
+        <void property="highKeyString"> 
+         <string>zzle. carefully enticing deposits nag furio</string> 
+        </void> 
+        <void property="lowKeyString"> 
+         <string>! bold packages haggle sometimes after the carefully express requests. final</string> 
+        </void> 
+       </object> 
+      </void> 
+     </array> 
+    </void> 
+    <void property="numberOfPages"> 
+     <int>1473</int> 
+    </void> 
+   </object> 
+  </void> 
+  <void property="tableFileName"> 
+   <string>order.mdtbl</string> 
+  </void> 
+  <void property="tableName"> 
+   <string>ORDERS</string> 
+  </void> 
+ </object> 
+ <object class="de.tuberlin.dima.minidb.catalogue.beans.TableDescriptorBean"> 
+  <void property="statistics"> 
+   <object class="de.tuberlin.dima.minidb.catalogue.beans.TableStatisticsBean"> 
+    <void property="cardinality"> 
+     <long>120515</long> 
+    </void> 
+    <void property="columnStatistics"> 
+     <array class="de.tuberlin.dima.minidb.catalogue.beans.ColumnStatisticsBean" length="16"> 
+      <void index="0"> 
+       <object class="de.tuberlin.dima.minidb.catalogue.beans.ColumnStatisticsBean"> 
+        <void property="cardinality"> 
+         <long>30000</long> 
+        </void> 
+        <void property="highKeyString"> 
+         <string>120000</string> 
+        </void> 
+        <void property="lowKeyString"> 
+         <string>1</string> 
+        </void> 
+       </object> 
+      </void> 
+      <void index="1"> 
+       <object class="de.tuberlin.dima.minidb.catalogue.beans.ColumnStatisticsBean"> 
+        <void property="cardinality"> 
+         <long>4000</long> 
+        </void> 
+        <void property="columnIndex"> 
+         <int>1</int> 
+        </void> 
+        <void property="highKeyString"> 
+         <string>4000</string> 
+        </void> 
+        <void property="lowKeyString"> 
+         <string>1</string> 
+        </void> 
+       </object> 
+      </void> 
+      <void index="2"> 
+       <object class="de.tuberlin.dima.minidb.catalogue.beans.ColumnStatisticsBean"> 
+        <void property="cardinality"> 
+         <long>200</long> 
+        </void> 
+        <void property="columnIndex"> 
+         <int>2</int> 
+        </void> 
+        <void property="highKeyString"> 
+         <string>200</string> 
+        </void> 
+        <void property="lowKeyString"> 
+         <string>1</string> 
+        </void> 
+       </object> 
+      </void> 
+      <void index="3"> 
+       <object class="de.tuberlin.dima.minidb.catalogue.beans.ColumnStatisticsBean"> 
+        <void property="cardinality"> 
+         <long>7</long> 
+        </void> 
+        <void property="columnIndex"> 
+         <int>3</int> 
+        </void> 
+        <void property="highKeyString"> 
+         <string>7</string> 
+        </void> 
+        <void property="lowKeyString"> 
+         <string>1</string> 
+        </void> 
+       </object> 
+      </void> 
+      <void index="4"> 
+       <object class="de.tuberlin.dima.minidb.catalogue.beans.ColumnStatisticsBean"> 
+        <void property="cardinality"> 
+         <long>50</long> 
+        </void> 
+        <void property="columnIndex"> 
+         <int>4</int> 
+        </void> 
+        <void property="highKeyString"> 
+         <string>50.0</string> 
+        </void> 
+        <void property="lowKeyString"> 
+         <string>1.0</string> 
+        </void> 
+       </object> 
+      </void> 
+      <void index="5"> 
+       <object class="de.tuberlin.dima.minidb.catalogue.beans.ColumnStatisticsBean"> 
+        <void property="cardinality"> 
+         <long>51697</long> 
+        </void> 
+        <void property="columnIndex"> 
+         <int>5</int> 
+        </void> 
+        <void property="highKeyString"> 
+         <string>95099.5</string> 
+        </void> 
+        <void property="lowKeyString"> 
+         <string>901.0</string> 
+        </void> 
+       </object> 
+      </void> 
+      <void index="6"> 
+       <object class="de.tuberlin.dima.minidb.catalogue.beans.ColumnStatisticsBean"> 
+        <void property="cardinality"> 
+         <long>11</long> 
+        </void> 
+        <void property="columnIndex"> 
+         <int>6</int> 
+        </void> 
+        <void property="highKeyString"> 
+         <string>0.1</string> 
+        </void> 
+        <void property="lowKeyString"> 
+         <string>0.0</string> 
+        </void> 
+       </object> 
+      </void> 
+      <void index="7"> 
+       <object class="de.tuberlin.dima.minidb.catalogue.beans.ColumnStatisticsBean"> 
+        <void property="cardinality"> 
+         <long>9</long> 
+        </void> 
+        <void property="columnIndex"> 
+         <int>7</int> 
+        </void> 
+        <void property="highKeyString"> 
+         <string>0.08</string> 
+        </void> 
+        <void property="lowKeyString"> 
+         <string>0.0</string> 
+        </void> 
+       </object> 
+      </void> 
+      <void index="8"> 
+       <object class="de.tuberlin.dima.minidb.catalogue.beans.ColumnStatisticsBean"> 
+        <void property="cardinality"> 
+         <long>3</long> 
+        </void> 
+        <void property="columnIndex"> 
+         <int>8</int> 
+        </void> 
+        <void property="highKeyString"> 
+         <string>R</string> 
+        </void> 
+        <void property="lowKeyString"> 
+         <string>A</string> 
+        </void> 
+       </object> 
+      </void> 
+      <void index="9"> 
+       <object class="de.tuberlin.dima.minidb.catalogue.beans.ColumnStatisticsBean"> 
+        <void property="cardinality"> 
+         <long>2</long> 
+        </void> 
+        <void property="columnIndex"> 
+         <int>9</int> 
+        </void> 
+        <void property="highKeyString"> 
+         <string>O</string> 
+        </void> 
+        <void property="lowKeyString"> 
+         <string>F</string> 
+        </void> 
+       </object> 
+      </void> 
+      <void index="10"> 
+       <object class="de.tuberlin.dima.minidb.catalogue.beans.ColumnStatisticsBean"> 
+        <void property="cardinality"> 
+         <long>2521</long> 
+        </void> 
+        <void property="columnIndex"> 
+         <int>10</int> 
+        </void> 
+        <void property="highKeyString"> 
+         <string>1998-11-29</string> 
+        </void> 
+        <void property="lowKeyString"> 
+         <string>1992-1-3</string> 
+        </void> 
+       </object> 
+      </void> 
+      <void index="11"> 
+       <object class="de.tuberlin.dima.minidb.catalogue.beans.ColumnStatisticsBean"> 
+        <void property="cardinality"> 
+         <long>2461</long> 
+        </void> 
+        <void property="columnIndex"> 
+         <int>11</int> 
+        </void> 
+        <void property="highKeyString"> 
+         <string>1998-10-29</string> 
+        </void> 
+        <void property="lowKeyString"> 
+         <string>1992-2-2</string> 
+        </void> 
+       </object> 
+      </void> 
+      <void index="12"> 
+       <object class="de.tuberlin.dima.minidb.catalogue.beans.ColumnStatisticsBean"> 
+        <void property="cardinality"> 
+         <long>2538</long> 
+        </void> 
+        <void property="columnIndex"> 
+         <int>12</int> 
+        </void> 
+        <void property="highKeyString"> 
+         <string>1998-12-25</string> 
+        </void> 
+        <void property="lowKeyString"> 
+         <string>1992-1-8</string> 
+        </void> 
+       </object> 
+      </void> 
+      <void index="13"> 
+       <object class="de.tuberlin.dima.minidb.catalogue.beans.ColumnStatisticsBean"> 
+        <void property="cardinality"> 
+         <long>4</long> 
+        </void> 
+        <void property="columnIndex"> 
+         <int>13</int> 
+        </void> 
+        <void property="highKeyString"> 
+         <string>TAKE BACK RETURN         </string> 
+        </void> 
+        <void property="lowKeyString"> 
+         <string>COLLECT COD              </string> 
+        </void> 
+       </object> 
+      </void> 
+      <void index="14"> 
+       <object class="de.tuberlin.dima.minidb.catalogue.beans.ColumnStatisticsBean"> 
+        <void property="cardinality"> 
+         <long>7</long> 
+        </void> 
+        <void property="columnIndex"> 
+         <int>14</int> 
+        </void> 
+        <void property="highKeyString"> 
+         <string>TRUCK     </string> 
+        </void> 
+        <void property="lowKeyString"> 
+         <string>AIR       </string> 
+        </void> 
+       </object> 
+      </void> 
+      <void index="15"> 
+       <object class="de.tuberlin.dima.minidb.catalogue.beans.ColumnStatisticsBean"> 
+        <void property="cardinality"> 
+         <long>113516</long> 
+        </void> 
+        <void property="columnIndex"> 
+         <int>15</int> 
+        </void> 
+        <void property="highKeyString"> 
+         <string>zzle: pending i</string> 
+        </void> 
+        <void property="lowKeyString"> 
+         <string>! blithely expres</string> 
+        </void> 
+       </object> 
+      </void> 
+     </array> 
+    </void> 
+    <void property="numberOfPages"> 
+     <int>5663</int> 
+    </void> 
+   </object> 
+  </void> 
+  <void property="tableFileName"> 
+   <string>lineitem.mdtbl</string> 
+  </void> 
+  <void property="tableName"> 
+   <string>LINEITEM</string> 
+  </void> 
+ </object> 
+ <object class="de.tuberlin.dima.minidb.catalogue.beans.TableDescriptorBean"> 
+  <void property="statistics"> 
+   <object class="de.tuberlin.dima.minidb.catalogue.beans.TableStatisticsBean"> 
+    <void property="cardinality"> 
+     <long>4000</long> 
+    </void> 
+    <void property="columnStatistics"> 
+     <array class="de.tuberlin.dima.minidb.catalogue.beans.ColumnStatisticsBean" length="9"> 
+      <void index="0"> 
+       <object class="de.tuberlin.dima.minidb.catalogue.beans.ColumnStatisticsBean"> 
+        <void property="cardinality"> 
+         <long>4000</long> 
+        </void> 
+        <void property="highKeyString"> 
+         <string>4000</string> 
+        </void> 
+        <void property="lowKeyString"> 
+         <string>1</string> 
+        </void> 
+       </object> 
+      </void> 
+      <void index="1"> 
+       <object class="de.tuberlin.dima.minidb.catalogue.beans.ColumnStatisticsBean"> 
+        <void property="cardinality"> 
+         <long>4000</long> 
+        </void> 
+        <void property="columnIndex"> 
+         <int>1</int> 
+        </void> 
+        <void property="highKeyString"> 
+         <string>yellow white tan khaki saddle</string> 
+        </void> 
+        <void property="lowKeyString"> 
+         <string>almond azure floral blush sienna</string> 
+        </void> 
+       </object> 
+      </void> 
+      <void index="2"> 
+       <object class="de.tuberlin.dima.minidb.catalogue.beans.ColumnStatisticsBean"> 
+        <void property="cardinality"> 
+         <long>5</long> 
+        </void> 
+        <void property="columnIndex"> 
+         <int>2</int> 
+        </void> 
+        <void property="highKeyString"> 
+         <string>Manufacturer#5           </string> 
+        </void> 
+        <void property="lowKeyString"> 
+         <string>Manufacturer#1           </string> 
+        </void> 
+       </object> 
+      </void> 
+      <void index="3"> 
+       <object class="de.tuberlin.dima.minidb.catalogue.beans.ColumnStatisticsBean"> 
+        <void property="cardinality"> 
+         <long>25</long> 
+        </void> 
+        <void property="columnIndex"> 
+         <int>3</int> 
+        </void> 
+        <void property="highKeyString"> 
+         <string>Brand#55  </string> 
+        </void> 
+        <void property="lowKeyString"> 
+         <string>Brand#11  </string> 
+        </void> 
+       </object> 
+      </void> 
+      <void index="4"> 
+       <object class="de.tuberlin.dima.minidb.catalogue.beans.ColumnStatisticsBean"> 
+        <void property="cardinality"> 
+         <long>150</long> 
+        </void> 
+        <void property="columnIndex"> 
+         <int>4</int> 
+        </void> 
+        <void property="highKeyString"> 
+         <string>STANDARD POLISHED TIN</string> 
+        </void> 
+        <void property="lowKeyString"> 
+         <string>ECONOMY ANODIZED BRASS</string> 
+        </void> 
+       </object> 
+      </void> 
+      <void index="5"> 
+       <object class="de.tuberlin.dima.minidb.catalogue.beans.ColumnStatisticsBean"> 
+        <void property="cardinality"> 
+         <long>50</long> 
+        </void> 
+        <void property="columnIndex"> 
+         <int>5</int> 
+        </void> 
+        <void property="highKeyString"> 
+         <string>50</string> 
+        </void> 
+        <void property="lowKeyString"> 
+         <string>1</string> 
+        </void> 
+       </object> 
+      </void> 
+      <void index="6"> 
+       <object class="de.tuberlin.dima.minidb.catalogue.beans.ColumnStatisticsBean"> 
+        <void property="cardinality"> 
+         <long>40</long> 
+        </void> 
+        <void property="columnIndex"> 
+         <int>6</int> 
+        </void> 
+        <void property="highKeyString"> 
+         <string>WRAP PKG  </string> 
+        </void> 
+        <void property="lowKeyString"> 
+         <string>JUMBO BAG </string> 
+        </void> 
+       </object> 
+      </void> 
+      <void index="7"> 
+       <object class="de.tuberlin.dima.minidb.catalogue.beans.ColumnStatisticsBean"> 
+        <void property="cardinality"> 
+         <long>1299</long> 
+        </void> 
+        <void property="columnIndex"> 
+         <int>7</int> 
+        </void> 
+        <void property="highKeyString"> 
+         <string>1902.99</string> 
+        </void> 
+        <void property="lowKeyString"> 
+         <string>901.0</string> 
+        </void> 
+       </object> 
+      </void> 
+      <void index="8"> 
+       <object class="de.tuberlin.dima.minidb.catalogue.beans.ColumnStatisticsBean"> 
+        <void property="cardinality"> 
+         <long>3758</long> 
+        </void> 
+        <void property="columnIndex"> 
+         <int>8</int> 
+        </void> 
+        <void property="highKeyString"> 
+         <string>zzle among t</string> 
+        </void> 
+        <void property="lowKeyString"> 
+         <string>! blithely specia</string> 
+        </void> 
+       </object> 
+      </void> 
+     </array> 
+    </void> 
+    <void property="numberOfPages"> 
+     <int>271</int> 
+    </void> 
+   </object> 
+  </void> 
+  <void property="tableFileName"> 
+   <string>part.mdtbl</string> 
+  </void> 
+  <void property="tableName"> 
+   <string>PART</string> 
+  </void> 
+ </object> 
+ <object class="de.tuberlin.dima.minidb.catalogue.beans.TableDescriptorBean"> 
+  <void property="statistics"> 
+   <object class="de.tuberlin.dima.minidb.catalogue.beans.TableStatisticsBean"> 
+    <void property="cardinality"> 
+     <long>3000</long> 
+    </void> 
+    <void property="columnStatistics"> 
+     <array class="de.tuberlin.dima.minidb.catalogue.beans.ColumnStatisticsBean" length="8"> 
+      <void index="0"> 
+       <object class="de.tuberlin.dima.minidb.catalogue.beans.ColumnStatisticsBean"> 
+        <void property="cardinality"> 
+         <long>3000</long> 
+        </void> 
+        <void property="highKeyString"> 
+         <string>3000</string> 
+        </void> 
+        <void property="lowKeyString"> 
+         <string>1</string> 
+        </void> 
+       </object> 
+      </void> 
+      <void index="1"> 
+       <object class="de.tuberlin.dima.minidb.catalogue.beans.ColumnStatisticsBean"> 
+        <void property="cardinality"> 
+         <long>3000</long> 
+        </void> 
+        <void property="columnIndex"> 
+         <int>1</int> 
+        </void> 
+        <void property="highKeyString"> 
+         <string>Customer#000003000</string> 
+        </void> 
+        <void property="lowKeyString"> 
+         <string>Customer#000000001</string> 
+        </void> 
+       </object> 
+      </void> 
+      <void index="2"> 
+       <object class="de.tuberlin.dima.minidb.catalogue.beans.ColumnStatisticsBean"> 
+        <void property="cardinality"> 
+         <long>3000</long> 
+        </void> 
+        <void property="columnIndex"> 
+         <int>2</int> 
+        </void> 
+        <void property="highKeyString"> 
+         <string>zyWvi,SGc,tXTls</string> 
+        </void> 
+        <void property="lowKeyString"> 
+         <string>,,8koG n7h1Tt,AgpwZYCP6IEKXuq46trQ6ot</string> 
+        </void> 
+       </object> 
+      </void> 
+      <void index="3"> 
+       <object class="de.tuberlin.dima.minidb.catalogue.beans.ColumnStatisticsBean"> 
+        <void property="cardinality"> 
+         <long>25</long> 
+        </void> 
+        <void property="columnIndex"> 
+         <int>3</int> 
+        </void> 
+        <void property="highKeyString"> 
+         <string>24</string> 
+        </void> 
+        <void property="lowKeyString"> 
+         <string>0</string> 
+        </void> 
+       </object> 
+      </void> 
+      <void index="4"> 
+       <object class="de.tuberlin.dima.minidb.catalogue.beans.ColumnStatisticsBean"> 
+        <void property="cardinality"> 
+         <long>3000</long> 
+        </void> 
+        <void property="columnIndex"> 
+         <int>4</int> 
+        </void> 
+        <void property="highKeyString"> 
+         <string>34-996-906-1652</string> 
+        </void> 
+        <void property="lowKeyString"> 
+         <string>10-109-430-5638</string> 
+        </void> 
+       </object> 
+      </void> 
+      <void index="5"> 
+       <object class="de.tuberlin.dima.minidb.catalogue.beans.ColumnStatisticsBean"> 
+        <void property="cardinality"> 
+         <long>2998</long> 
+        </void> 
+        <void property="columnIndex"> 
+         <int>5</int> 
+        </void> 
+        <void property="highKeyString"> 
+         <string>9999.72</string> 
+        </void> 
+        <void property="lowKeyString"> 
+         <string>-994.79</string> 
+        </void> 
+       </object> 
+      </void> 
+      <void index="6"> 
+       <object class="de.tuberlin.dima.minidb.catalogue.beans.ColumnStatisticsBean"> 
+        <void property="cardinality"> 
+         <long>5</long> 
+        </void> 
+        <void property="columnIndex"> 
+         <int>6</int> 
+        </void> 
+        <void property="highKeyString"> 
+         <string>MACHINERY </string> 
+        </void> 
+        <void property="lowKeyString"> 
+         <string>AUTOMOBILE</string> 
+        </void> 
+       </object> 
+      </void> 
+      <void index="7"> 
+       <object class="de.tuberlin.dima.minidb.catalogue.beans.ColumnStatisticsBean"> 
+        <void property="cardinality"> 
+         <long>3000</long> 
+        </void> 
+        <void property="columnIndex"> 
+         <int>7</int> 
+        </void> 
+        <void property="highKeyString"> 
+         <string>ymptotes. ironic, unusual notornis wake after the ironic, special deposits. blithely fina</string> 
+        </void> 
+        <void property="lowKeyString"> 
+         <string>, bold instructions integrate slyly final accounts! carefully final accounts caj</string> 
+        </void> 
+       </object> 
+      </void> 
+     </array> 
+    </void> 
+    <void property="numberOfPages"> 
+     <int>251</int> 
+    </void> 
+   </object> 
+  </void> 
+  <void property="tableFileName"> 
+   <string>customer.mdtbl</string> 
+  </void> 
+  <void property="tableName"> 
+   <string>CUSTOMER</string> 
+  </void> 
+ </object> 
+ <object class="de.tuberlin.dima.minidb.catalogue.beans.TableDescriptorBean"> 
+  <void property="statistics"> 
+   <object class="de.tuberlin.dima.minidb.catalogue.beans.TableStatisticsBean"> 
+    <void property="cardinality"> 
+     <long>16000</long> 
+    </void> 
+    <void property="columnStatistics"> 
+     <array class="de.tuberlin.dima.minidb.catalogue.beans.ColumnStatisticsBean" length="5"> 
+      <void index="0"> 
+       <object class="de.tuberlin.dima.minidb.catalogue.beans.ColumnStatisticsBean"> 
+        <void property="cardinality"> 
+         <long>4000</long> 
+        </void> 
+        <void property="highKeyString"> 
+         <string>4000</string> 
+        </void> 
+        <void property="lowKeyString"> 
+         <string>1</string> 
+        </void> 
+       </object> 
+      </void> 
+      <void index="1"> 
+       <object class="de.tuberlin.dima.minidb.catalogue.beans.ColumnStatisticsBean"> 
+        <void property="cardinality"> 
+         <long>200</long> 
+        </void> 
+        <void property="columnIndex"> 
+         <int>1</int> 
+        </void> 
+        <void property="highKeyString"> 
+         <string>200</string> 
+        </void> 
+        <void property="lowKeyString"> 
+         <string>1</string> 
+        </void> 
+       </object> 
+      </void> 
+      <void index="2"> 
+       <object class="de.tuberlin.dima.minidb.catalogue.beans.ColumnStatisticsBean"> 
+        <void property="cardinality"> 
+         <long>8013</long> 
+        </void> 
+        <void property="columnIndex"> 
+         <int>2</int> 
+        </void> 
+        <void property="highKeyString"> 
+         <string>9999</string> 
+        </void> 
+        <void property="lowKeyString"> 
+         <string>1</string> 
+        </void> 
+       </object> 
+      </void> 
+      <void index="3"> 
+       <object class="de.tuberlin.dima.minidb.catalogue.beans.ColumnStatisticsBean"> 
+        <void property="cardinality"> 
+         <long>14792</long> 
+        </void> 
+        <void property="columnIndex"> 
+         <int>3</int> 
+        </void> 
+        <void property="highKeyString"> 
+         <string>999.99</string> 
+        </void> 
+        <void property="lowKeyString"> 
+         <string>1.05</string> 
+        </void> 
+       </object> 
+      </void> 
+      <void index="4"> 
+       <object class="de.tuberlin.dima.minidb.catalogue.beans.ColumnStatisticsBean"> 
+        <void property="cardinality"> 
+         <long>16000</long> 
+        </void> 
+        <void property="columnIndex"> 
+         <int>4</int> 
+        </void> 
+        <void property="highKeyString"> 
+         <string>zzle blithely about the furiously final foxes. pen</string> 
+        </void> 
+        <void property="lowKeyString"> 
+         <string>! asymptotes sleep slyly instructions. final, ironic packages haggle among the regular, silent deposits. final accounts haggle fluffily. blithely ironic foxes haggle blithely blithely ev</string> 
+        </void> 
+       </object> 
+      </void> 
+     </array> 
+    </void> 
+    <void property="numberOfPages"> 
+     <int>1148</int> 
+    </void> 
+   </object> 
+  </void> 
+  <void property="tableFileName"> 
+   <string>partsupplier.mdtbl</string> 
+  </void> 
+  <void property="tableName"> 
+   <string>PARTSUPPLIER</string> 
+  </void> 
+ </object> 
+ <object class="de.tuberlin.dima.minidb.catalogue.beans.TableDescriptorBean"> 
+  <void property="statistics"> 
+   <object class="de.tuberlin.dima.minidb.catalogue.beans.TableStatisticsBean"> 
+    <void property="cardinality"> 
+     <long>200</long> 
+    </void> 
+    <void property="columnStatistics"> 
+     <array class="de.tuberlin.dima.minidb.catalogue.beans.ColumnStatisticsBean" length="7"> 
+      <void index="0"> 
+       <object class="de.tuberlin.dima.minidb.catalogue.beans.ColumnStatisticsBean"> 
+        <void property="cardinality"> 
+         <long>200</long> 
+        </void> 
+        <void property="highKeyString"> 
+         <string>200</string> 
+        </void> 
+        <void property="lowKeyString"> 
+         <string>1</string> 
+        </void> 
+       </object> 
+      </void> 
+      <void index="1"> 
+       <object class="de.tuberlin.dima.minidb.catalogue.beans.ColumnStatisticsBean"> 
+        <void property="cardinality"> 
+         <long>200</long> 
+        </void> 
+        <void property="columnIndex"> 
+         <int>1</int> 
+        </void> 
+        <void property="highKeyString"> 
+         <string>Supplier#000000200       </string> 
+        </void> 
+        <void property="lowKeyString"> 
+         <string>Supplier#000000001       </string> 
+        </void> 
+       </object> 
+      </void> 
+      <void index="2"> 
+       <object class="de.tuberlin.dima.minidb.catalogue.beans.ColumnStatisticsBean"> 
+        <void property="cardinality"> 
+         <long>200</long> 
+        </void> 
+        <void property="columnIndex"> 
+         <int>2</int> 
+        </void> 
+        <void property="highKeyString"> 
+         <string>zyIeWzbbpkTV37vm1nmSGBxSgd2Kp</string> 
+        </void> 
+        <void property="lowKeyString"> 
+         <string>,KXbCcjqZNjmyHzeqaL4</string> 
+        </void> 
+       </object> 
+      </void> 
+      <void index="3"> 
+       <object class="de.tuberlin.dima.minidb.catalogue.beans.ColumnStatisticsBean"> 
+        <void property="cardinality"> 
+         <long>25</long> 
+        </void> 
+        <void property="columnIndex"> 
+         <int>3</int> 
+        </void> 
+        <void property="highKeyString"> 
+         <string>24</string> 
+        </void> 
+        <void property="lowKeyString"> 
+         <string>0</string> 
+        </void> 
+       </object> 
+      </void> 
+      <void index="4"> 
+       <object class="de.tuberlin.dima.minidb.catalogue.beans.ColumnStatisticsBean"> 
+        <void property="cardinality"> 
+         <long>200</long> 
+        </void> 
+        <void property="columnIndex"> 
+         <int>4</int> 
+        </void> 
+        <void property="highKeyString"> 
+         <string>34-876-912-6007</string> 
+        </void> 
+        <void property="lowKeyString"> 
+         <string>10-470-144-1330</string> 
+        </void> 
+       </object> 
+      </void> 
+      <void index="5"> 
+       <object class="de.tuberlin.dima.minidb.catalogue.beans.ColumnStatisticsBean"> 
+        <void property="cardinality"> 
+         <long>200</long> 
+        </void> 
+        <void property="columnIndex"> 
+         <int>5</int> 
+        </void> 
+        <void property="highKeyString"> 
+         <string>9915.24</string> 
+        </void> 
+        <void property="lowKeyString"> 
+         <string>-966.2</string> 
+        </void> 
+       </object> 
+      </void> 
+      <void index="6"> 
+       <object class="de.tuberlin.dima.minidb.catalogue.beans.ColumnStatisticsBean"> 
+        <void property="cardinality"> 
+         <long>200</long> 
+        </void> 
+        <void property="columnIndex"> 
+         <int>6</int> 
+        </void> 
+        <void property="highKeyString"> 
+         <string>ymptotes. blithely regular theodolites are slyly according to the</string> 
+        </void> 
+        <void property="lowKeyString"> 
+         <string>! carefully ironic instructions nag quickly pending requests. fluffily even deposits sleep a</string> 
+        </void> 
+       </object> 
+      </void> 
+     </array> 
+    </void> 
+    <void property="numberOfPages"> 
+     <int>15</int> 
+    </void> 
+   </object> 
+  </void> 
+  <void property="tableFileName"> 
+   <string>supplier.mdtbl</string> 
+  </void> 
+  <void property="tableName"> 
+   <string>SUPPLIER</string> 
+  </void> 
+ </object> 
+ <object class="de.tuberlin.dima.minidb.catalogue.beans.TableDescriptorBean"> 
+  <void property="statistics"> 
+   <object class="de.tuberlin.dima.minidb.catalogue.beans.TableStatisticsBean"> 
+    <void property="cardinality"> 
+     <long>25</long> 
+    </void> 
+    <void property="columnStatistics"> 
+     <array class="de.tuberlin.dima.minidb.catalogue.beans.ColumnStatisticsBean" length="4"> 
+      <void index="0"> 
+       <object class="de.tuberlin.dima.minidb.catalogue.beans.ColumnStatisticsBean"> 
+        <void property="cardinality"> 
+         <long>25</long> 
+        </void> 
+        <void property="highKeyString"> 
+         <string>24</string> 
+        </void> 
+        <void property="lowKeyString"> 
+         <string>0</string> 
+        </void> 
+       </object> 
+      </void> 
+      <void index="1"> 
+       <object class="de.tuberlin.dima.minidb.catalogue.beans.ColumnStatisticsBean"> 
+        <void property="cardinality"> 
+         <long>25</long> 
+        </void> 
+        <void property="columnIndex"> 
+         <int>1</int> 
+        </void> 
+        <void property="highKeyString"> 
+         <string>VIETNAM                  </string> 
+        </void> 
+        <void property="lowKeyString"> 
+         <string>ALGERIA                  </string> 
+        </void> 
+       </object> 
+      </void> 
+      <void index="2"> 
+       <object class="de.tuberlin.dima.minidb.catalogue.beans.ColumnStatisticsBean"> 
+        <void property="cardinality"> 
+         <long>5</long> 
+        </void> 
+        <void property="columnIndex"> 
+         <int>2</int> 
+        </void> 
+        <void property="highKeyString"> 
+         <string>4</string> 
+        </void> 
+        <void property="lowKeyString"> 
+         <string>0</string> 
+        </void> 
+       </object> 
+      </void> 
+      <void index="3"> 
+       <object class="de.tuberlin.dima.minidb.catalogue.beans.ColumnStatisticsBean"> 
+        <void property="cardinality"> 
+         <long>25</long> 
+        </void> 
+        <void property="columnIndex"> 
+         <int>3</int> 
+        </void> 
+        <void property="highKeyString"> 
+         <string>y final packages. slow foxes cajole quickly. quickly silent platelets breach ironic accounts. unusual pinto be</string> 
+        </void> 
+        <void property="lowKeyString"> 
+         <string>al foxes promise slyly according to the regular accounts. bold requests alon</string> 
+        </void> 
+       </object> 
+      </void> 
+     </array> 
+    </void> 
+    <void property="numberOfPages"> 
+     <int>2</int> 
+    </void> 
+   </object> 
+  </void> 
+  <void property="tableFileName"> 
+   <string>nation.mdtbl</string> 
+  </void> 
+  <void property="tableName"> 
+   <string>NATION</string> 
+  </void> 
+ </object> 
+ <object class="de.tuberlin.dima.minidb.catalogue.beans.IndexDescriptorBean"> 
+  <void property="indexFileName"> 
+   <string>lineitem_fk_order.mdidx</string> 
+  </void> 
+  <void property="indexName"> 
+   <string>LINEITEM_FK_ORDER</string> 
+  </void> 
+  <void property="indexedTableName"> 
+   <string>LINEITEM</string> 
+  </void> 
+  <void property="statistics"> 
+   <object class="de.tuberlin.dima.minidb.catalogue.IndexStatistics"> 
+    <void property="numberOfLeaves"> 
+     <int>713</int> 
+    </void> 
+   </object> 
+  </void> 
+ </object> 
+ <object class="de.tuberlin.dima.minidb.catalogue.beans.IndexDescriptorBean"> 
+  <void property="indexFileName"> 
+   <string>order_fk_customer.mdidx</string> 
+  </void> 
+  <void property="indexName"> 
+   <string>ORDER_FK_CUSTOMER</string> 
+  </void> 
+  <void property="indexedTableName"> 
+   <string>ORDERS</string> 
+  </void> 
+  <void property="statistics"> 
+   <object class="de.tuberlin.dima.minidb.catalogue.IndexStatistics"> 
+    <void property="numberOfLeaves"> 
+     <int>123</int> 
+    </void> 
+    <void property="treeDepth"> 
+     <int>2</int> 
+    </void> 
+   </object> 
+  </void> 
+ </object> 
+ <object class="de.tuberlin.dima.minidb.catalogue.beans.IndexDescriptorBean"> 
+  <void property="indexFileName"> 
+   <string>lineitem_fk_supplier.mdidx</string> 
+  </void> 
+  <void property="indexName"> 
+   <string>LINEITEM_FK_SUPPLIER</string> 
+  </void> 
+  <void property="indexedTableName"> 
+   <string>LINEITEM</string> 
+  </void> 
+  <void property="statistics"> 
+   <object class="de.tuberlin.dima.minidb.catalogue.IndexStatistics"> 
+    <void property="numberOfLeaves"> 
+     <int>511</int> 
+    </void> 
+   </object> 
+  </void> 
+ </object> 
+ <object class="de.tuberlin.dima.minidb.catalogue.beans.IndexDescriptorBean"> 
+  <void property="indexFileName"> 
+   <string>partsupplier_fk_supplier.mdidx</string> 
+  </void> 
+  <void property="indexName"> 
+   <string>PARTSUPPLIER_FK_SUPPLIER</string> 
+  </void> 
+  <void property="indexedTableName"> 
+   <string>PARTSUPPLIER</string> 
+  </void> 
+  <void property="statistics"> 
+   <object class="de.tuberlin.dima.minidb.catalogue.IndexStatistics"> 
+    <void property="numberOfLeaves"> 
+     <int>67</int> 
+    </void> 
+    <void property="treeDepth"> 
+     <int>2</int> 
+    </void> 
+   </object> 
+  </void> 
+ </object> 
+ <object class="de.tuberlin.dima.minidb.catalogue.beans.IndexDescriptorBean"> 
+  <void property="indexFileName"> 
+   <string>lineitem_10.mdidx</string> 
+  </void> 
+  <void property="indexName"> 
+   <string>lineitem_shipdate</string> 
+  </void> 
+  <void property="indexedTableName"> 
+   <string>LINEITEM</string> 
+  </void> 
+  <void property="statistics"> 
+   <object class="de.tuberlin.dima.minidb.catalogue.IndexStatistics"> 
+    <void property="numberOfLeaves"> 
+     <int>497</int> 
+    </void> 
+    <void property="treeDepth"> 
+     <int>2</int> 
+    </void> 
+   </object> 
+  </void> 
+ </object> 
+ <object class="de.tuberlin.dima.minidb.catalogue.beans.IndexDescriptorBean"> 
+  <void property="indexFileName"> 
+   <string>part_pk.mdidx</string> 
+  </void> 
+  <void property="indexName"> 
+   <string>PART_PK</string> 
+  </void> 
+  <void property="indexedTableName"> 
+   <string>PART</string> 
+  </void> 
+  <void property="statistics"> 
+   <object class="de.tuberlin.dima.minidb.catalogue.IndexStatistics"> 
+    <void property="numberOfLeaves"> 
+     <int>23</int> 
+    </void> 
+    <void property="treeDepth"> 
+     <int>2</int> 
+    </void> 
+   </object> 
+  </void> 
+ </object> 
+ <object class="de.tuberlin.dima.minidb.catalogue.beans.IndexDescriptorBean"> 
+  <void property="indexFileName"> 
+   <string>customer_pk.mdidx</string> 
+  </void> 
+  <void property="indexName"> 
+   <string>CUSTOMER_PK</string> 
+  </void> 
+  <void property="indexedTableName"> 
+   <string>CUSTOMER</string> 
+  </void> 
+  <void property="statistics"> 
+   <object class="de.tuberlin.dima.minidb.catalogue.IndexStatistics"> 
+    <void property="numberOfLeaves"> 
+     <int>17</int> 
+    </void> 
+    <void property="treeDepth"> 
+     <int>2</int> 
+    </void> 
+   </object> 
+  </void> 
+ </object> 
+ <object class="de.tuberlin.dima.minidb.catalogue.beans.IndexDescriptorBean"> 
+  <void property="indexFileName"> 
+   <string>partsupplier_fk_part.mdidx</string> 
+  </void> 
+  <void property="indexName"> 
+   <string>PARTSUPPLIER_FK_PART</string> 
+  </void> 
+  <void property="indexedTableName"> 
+   <string>PARTSUPPLIER</string> 
+  </void> 
+  <void property="statistics"> 
+   <object class="de.tuberlin.dima.minidb.catalogue.IndexStatistics"> 
+    <void property="numberOfLeaves"> 
+     <int>94</int> 
+    </void> 
+    <void property="treeDepth"> 
+     <int>2</int> 
+    </void> 
+   </object> 
+  </void> 
+ </object> 
+ <object class="de.tuberlin.dima.minidb.catalogue.beans.IndexDescriptorBean"> 
+  <void property="indexFileName"> 
+   <string>supplier_pk.mdidx</string> 
+  </void> 
+  <void property="indexName"> 
+   <string>SUPPLIER_PK</string> 
+  </void> 
+  <void property="indexedTableName"> 
+   <string>SUPPLIER</string> 
+  </void> 
+  <void property="statistics"> 
+   <object class="de.tuberlin.dima.minidb.catalogue.IndexStatistics"> 
+    <void property="numberOfLeaves"> 
+     <int>1</int> 
+    </void> 
+    <void property="treeDepth"> 
+     <int>1</int> 
+    </void> 
+   </object> 
+  </void> 
+ </object> 
+ <object class="de.tuberlin.dima.minidb.catalogue.beans.IndexDescriptorBean"> 
+  <void property="indexFileName"> 
+   <string>lineitem_12.mdidx</string> 
+  </void> 
+  <void property="indexName"> 
+   <string>lineitem_receiptdate</string> 
+  </void> 
+  <void property="indexedTableName"> 
+   <string>LINEITEM</string> 
+  </void> 
+  <void property="statistics"> 
+   <object class="de.tuberlin.dima.minidb.catalogue.IndexStatistics"> 
+    <void property="numberOfLeaves"> 
+     <int>499</int> 
+    </void> 
+    <void property="treeDepth"> 
+     <int>2</int> 
+    </void> 
+   </object> 
+  </void> 
+ </object> 
+ <object class="de.tuberlin.dima.minidb.catalogue.beans.IndexDescriptorBean"> 
+  <void property="indexFileName"> 
+   <string>lineitem_fk_part.mdidx</string> 
+  </void> 
+  <void property="indexName"> 
+   <string>LINEITEM_FK_PART</string> 
+  </void> 
+  <void property="indexedTableName"> 
+   <string>LINEITEM</string> 
+  </void> 
+  <void property="statistics"> 
+   <object class="de.tuberlin.dima.minidb.catalogue.IndexStatistics"> 
+    <void property="numberOfLeaves"> 
+     <int>494</int> 
+    </void> 
+    <void property="treeDepth"> 
+     <int>2</int> 
+    </void> 
+   </object> 
+  </void> 
+ </object> 
+ <object class="de.tuberlin.dima.minidb.catalogue.beans.IndexDescriptorBean"> 
+  <void property="indexFileName"> 
+   <string>orders_4.mdidx</string> 
+  </void> 
+  <void property="indexName"> 
+   <string>orders_orderdate</string> 
+  </void> 
+  <void property="indexedTableName"> 
+   <string>ORDERS</string> 
+  </void> 
+  <void property="statistics"> 
+   <object class="de.tuberlin.dima.minidb.catalogue.IndexStatistics"> 
+    <void property="numberOfLeaves"> 
+     <int>123</int> 
+    </void> 
+    <void property="treeDepth"> 
+     <int>2</int> 
+    </void> 
+   </object> 
+  </void> 
+ </object> 
+ <object class="de.tuberlin.dima.minidb.catalogue.beans.IndexDescriptorBean"> 
+  <void property="indexFileName"> 
+   <string>order_pk.mdidx</string> 
+  </void> 
+  <void property="indexName"> 
+   <string>ORDER_PK</string> 
+  </void> 
+  <void property="indexedTableName"> 
+   <string>ORDERS</string> 
+  </void> 
+  <void property="statistics"> 
+   <object class="de.tuberlin.dima.minidb.catalogue.IndexStatistics"> 
+    <void property="numberOfLeaves"> 
+     <int>177</int> 
+    </void> 
+    <void property="treeDepth"> 
+     <int>2</int> 
+    </void> 
+   </object> 
+  </void> 
+ </object> 
+ <object class="de.tuberlin.dima.minidb.catalogue.beans.IndexDescriptorBean"> 
+  <void property="indexFileName"> 
+   <string>lineitem_11.mdidx</string> 
+  </void> 
+  <void property="indexName"> 
+   <string>lineitem_commitdate</string> 
+  </void> 
+  <void property="indexedTableName"> 
+   <string>LINEITEM</string> 
+  </void> 
+  <void property="statistics"> 
+   <object class="de.tuberlin.dima.minidb.catalogue.IndexStatistics"> 
+    <void property="numberOfLeaves"> 
+     <int>505</int> 
+    </void> 
+    <void property="treeDepth"> 
+     <int>2</int> 
+    </void> 
+   </object> 
+  </void> 
+ </object> 
+</java> 

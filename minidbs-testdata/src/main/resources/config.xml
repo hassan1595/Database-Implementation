@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+<comment>Database Physical Parameters</comment>
+<entry key="CACHE_SIZE_FOR_PAGE_SIZE_8192">2000</entry>
+<entry key="QUERY_HEAP_SIZE">41943040</entry>
+<entry key="CACHE_SIZE_FOR_PAGE_SIZE_4096">10000</entry>
+<entry key="NUM_IO_BUFFERS">512</entry>
+<entry key="TEMPSPACE_DIRECTORY">/tempspace/</entry>
+<entry key="DATA_DIRECTORY">/data/</entry>
+</properties>
