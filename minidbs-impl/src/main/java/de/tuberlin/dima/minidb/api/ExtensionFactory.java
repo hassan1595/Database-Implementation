@@ -29,6 +29,7 @@ import de.tuberlin.dima.minidb.qexec.predicate.JoinPredicate;
 import de.tuberlin.dima.minidb.qexec.predicate.LocalPredicate;
 import de.tuberlin.dima.minidb.semantics.SelectQueryAnalyzer;
 import de.tuberlin.dima.minidb.warm_up.Sort;
+import de.tuberlin.dima.minidb.warm_up.SortImpl;
 
 import java.util.logging.Logger;
 
@@ -41,12 +42,12 @@ public class ExtensionFactory extends AbstractExtensionFactory {
 
 	@Override
 	public TablePage createTablePage(TableSchema schema, byte[] binaryPage) throws PageFormatException {
-		throw new UnsupportedOperationException("Method not yet supported");
+		return new TablePage(schema, binaryPage);
 	}
 
 	@Override
 	public TablePage initTablePage(TableSchema schema, byte[] binaryPage, int newPageNumber) throws PageFormatException {
-		throw new UnsupportedOperationException("Method not yet supported");
+		return new TablePage(schema, binaryPage, newPageNumber);
 	}
 
 	@Override
@@ -194,6 +195,6 @@ public class ExtensionFactory extends AbstractExtensionFactory {
 
 	@Override
 	public Sort createSortOperator() {
-		throw new UnsupportedOperationException("Method not yet supported");
+		return new SortImpl();
 	}
 }

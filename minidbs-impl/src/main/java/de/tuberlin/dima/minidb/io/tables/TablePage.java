@@ -1,11 +1,7 @@
 package de.tuberlin.dima.minidb.io.tables;
 
 import de.tuberlin.dima.minidb.catalogue.TableSchema;
-import de.tuberlin.dima.minidb.core.BigIntField;
-import de.tuberlin.dima.minidb.core.DataField;
-import de.tuberlin.dima.minidb.core.DataTuple;
-import de.tuberlin.dima.minidb.core.IntField;
-import de.tuberlin.dima.minidb.core.RID;
+import de.tuberlin.dima.minidb.core.*;
 import de.tuberlin.dima.minidb.io.cache.PageExpiredException;
 import de.tuberlin.dima.minidb.qexec.LowLevelPredicate;
 import de.tuberlin.dima.minidb.qexec.QueryExecutionException;
@@ -109,6 +105,23 @@ public class TablePage {
         return nRecords.getValue();
     }
 
+    private boolean checkVariableOverflow(DataTuple tuple){
+
+        int bytesVariables = 0;
+        for(int i = 0 ; i < tuple.getNumberOfFields(); i++)
+        {
+
+            if (!schema.getColumn(i).getDataType().getBasicType().isFixLength())  {
+
+                bytesVariables += tuple.getField(i).getNumberOfBytes();
+            }
+        }
+        int varOffset = IntField.getFieldFromBinary(this.binPage, this.offsetVarOffset).getValue();
+        int nRecordsBefore = this.getNumRecordsOnPage();
+        int rWidth = IntField.getFieldFromBinary(this.binPage, this.offsetRWidth).getValue();
+        int offset = this.TABLE_DATA_PAGE_HEADER_BYTES + nRecordsBefore*rWidth;
+        return offset + rWidth > varOffset - bytesVariables;
+    }
     public boolean insertTuple(DataTuple tuple) {
 
         this.throwExceptionIfExpired();
@@ -121,27 +134,43 @@ public class TablePage {
             return false;
         }
 
-        IntField metadata = new IntField(1);
+        if(this.checkVariableOverflow(tuple))
+        {
+            return false;
+        }
+
+        IntField metadata = new IntField(0);
         metadata.encodeBinary(this.binPage, offset);
         offset += metadata.getNumberOfBytes();
 
-
         for(int i = 0 ; i < tuple.getNumberOfFields(); i++)
         {
+
+
             if (schema.getColumn(i).getDataType().getBasicType().isFixLength())  {
                 tuple.getField(i).encodeBinary(this.binPage, offset);
-                offset += tuple.getField(i).getNumberOfBytes();
+                offset += schema.getColumn(i).getDataType().getNumberOfBytes();
             }
-            else{
+            else {
+                if (tuple.getField(i).isNULL()){
+                    BigIntField varPointer = new BigIntField(0);
+                    varPointer.encodeBinary(this.binPage, offset);
+                    offset += 8;
 
-                int lengthVariable = tuple.getField(i).getNumberOfBytes();
-                int varOffset = IntField.getFieldFromBinary(this.binPage, this.offsetVarOffset).getValue() - lengthVariable;
-                tuple.getField(i).encodeBinary(this.binPage, varOffset);
-                IntField newVarOffset = new IntField(binPage.length);
-                newVarOffset.encodeBinary(binPage, this.offsetVarOffset );
-                BigIntField varPointer = new BigIntField((long) lengthVariable << 32 + varOffset);
-                varPointer.encodeBinary(this.binPage, offset);
-                offset += varPointer.getNumberOfBytes();
+                }
+                else {
+                    int lengthVariable = tuple.getField(i).getNumberOfBytes();
+                    int newVarOffset = IntField.getFieldFromBinary(this.binPage, this.offsetVarOffset).getValue() - lengthVariable;
+                    tuple.getField(i).encodeBinary(this.binPage, newVarOffset);
+                    IntField newVarOffsetField = new IntField(newVarOffset);
+                    newVarOffsetField.encodeBinary(binPage, this.offsetVarOffset );
+
+                    BigIntField varPointer = new BigIntField( ((long)lengthVariable << 32) + newVarOffset);
+                    varPointer.encodeBinary(this.binPage, offset);
+                    offset += 8;
+
+                }
+
 
             }
         }
@@ -155,38 +184,64 @@ public class TablePage {
     public DataTuple getDataTuple(int position, long columnBitmap, int numCols){
 
         this.throwExceptionIfExpired();
+
         int rWidth = IntField.getFieldFromBinary(this.binPage, this.offsetRWidth).getValue();
         int recordOffset = this.TABLE_DATA_PAGE_HEADER_BYTES +  rWidth * position;
+        int metadata =  IntField.getFieldFromBinary(this.binPage, recordOffset).getValue();
+        if (metadata ==1){
+            return null;
+        }
+        if (position >= this.getNumRecordsOnPage())
+        {
+            return null;
+        }
         DataField[] fields = new DataField[numCols];
         int fields_idx = 0;
         int fieldOffset = recordOffset + 4;
+        int totalNumCols = this.schema.getNumberOfColumns();
+
 
         for (int i = 0; i < 64; i++) {
 
-            if ( ((1L << i) & columnBitmap) != 0) {
+            if (i >= totalNumCols) {
+                break;
+            }
 
-                if (schema.getColumn(i).getDataType().getBasicType().isFixLength()) {
 
+            if (schema.getColumn(i).getDataType().getBasicType().isFixLength()) {
+
+
+                if ( ((1L << i) & columnBitmap) != 0) {
                     fields[fields_idx] = schema.getColumn(i).getDataType().getFromBinary(this.binPage, fieldOffset);
-                    fieldOffset += schema.getColumn(i).getDataType().getNumberOfBytes();
                     fields_idx += 1;
-
-
-                } else {
-
-                    long varPointer = BigIntField.getFieldFromBinary(this.binPage, fieldOffset).getValue();
-                    int lengthVariable = (int) (varPointer >> 32);
-                    int varOffset = (int) (varPointer);
-                    fields[fields_idx] = schema.getColumn(i).getDataType().getFromBinary(this.binPage, varOffset, lengthVariable);
-                    fields_idx += 1;
-
-
                 }
 
+                fieldOffset += schema.getColumn(i).getDataType().getNumberOfBytes();
+
+            }
+            else {
+
+                if ( ((1L << i) & columnBitmap) != 0) {
+                    long varPointer = BigIntField.getFieldFromBinary(this.binPage, fieldOffset).getValue();
+                    if (varPointer == 0) {
+                        fields[fields_idx] = schema.getColumn(i).getDataType().getNullValue();
+                    }
+                    else{
+
+                        int lengthVariable = (int) (varPointer >> 32);
+                        int varOffset = (int) (varPointer);
+                        fields[fields_idx] = schema.getColumn(i).getDataType().getFromBinary(this.binPage, varOffset, lengthVariable);
+                    }
+                    fields_idx += 1;
+                }
+                fieldOffset += 8;
+
             }
 
+        }
 
-            }
+
+
         return new DataTuple(fields);
         }
 
@@ -199,6 +254,11 @@ public class TablePage {
         long allColumnBitmap = (long)(Math.pow(2, schema.getNumberOfColumns()) - 1);
         int allCols = schema.getNumberOfColumns();;
         DataTuple allTupel = getDataTuple(position, allColumnBitmap, allCols);
+        if (allTupel == null)
+        {
+            return null;
+        }
+
         boolean pass = true;
         for(LowLevelPredicate pred: preds){
 
@@ -216,20 +276,20 @@ public class TablePage {
 
     private  class TIteratorimpl implements  TupleIterator{
 
-        private final DataTuple[] dts;
+        private final ArrayList<DataTuple> dts;
         private int i = 0;
-        public TIteratorimpl(DataTuple[] dts)
+        public TIteratorimpl(ArrayList<DataTuple> dts)
         {
             this.dts = dts;
         }
         @Override
         public boolean hasNext() throws PageTupleAccessException {
-            return (i < this.dts.length);
+            return (i < this.dts.size());
         }
 
         @Override
         public DataTuple next() throws PageTupleAccessException {
-            DataTuple res = this.dts[i];
+            DataTuple res = this.dts.get(i);
             this.i += 1;
             return res;
         }
@@ -238,10 +298,14 @@ public class TablePage {
 
 
         this.throwExceptionIfExpired();
-        DataTuple[] dts = new DataTuple[this.getNumRecordsOnPage()] ;
+        ArrayList<DataTuple> dts  = new  ArrayList<DataTuple>() ;
         for (int r_idx = 0 ; r_idx < this.getNumRecordsOnPage(); r_idx++)
         {
-            dts[r_idx] = getDataTuple(r_idx, columnBitmap,numCols );
+            DataTuple dt = getDataTuple(r_idx, columnBitmap,numCols );
+            if (dt != null)
+            {
+                dts.add(dt);
+            }
         }
 
         return new TIteratorimpl(dts);
@@ -250,10 +314,16 @@ public class TablePage {
     public TupleIterator getIterator(LowLevelPredicate[] preds,
                               int numCols, long columnBitmap) throws QueryExecutionException {
 
-        DataTuple[] dts = new DataTuple[this.getNumRecordsOnPage()] ;
+        ArrayList<DataTuple> dts  = new  ArrayList<DataTuple>() ;
         for (int r_idx = 0 ; r_idx < this.getNumRecordsOnPage(); r_idx++)
         {
-            dts[r_idx] = getDataTuple(preds, r_idx, columnBitmap,numCols );
+            DataTuple dt = getDataTuple(preds, r_idx, columnBitmap,numCols );
+
+            if(dt != null)
+            {
+                dts.add(dt);
+            }
+
         }
 
         return new TIteratorimpl(dts);
@@ -293,7 +363,7 @@ public class TablePage {
         int i = 0;
         while(dts.hasNext()){
 
-            RID recordId = new RID((long) this.getPageNumber() << 32 + i);
+            RID recordId = new RID(((long) this.getPageNumber() << 32) + i);
             Pair<DataTuple, RID> pair = new Pair<>(dts.next(), recordId);
             pairs.add(pair);
             i++;
