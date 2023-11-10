@@ -6,9 +6,10 @@ import de.tuberlin.dima.minidb.io.cache.PageExpiredException;
 import de.tuberlin.dima.minidb.qexec.LowLevelPredicate;
 import de.tuberlin.dima.minidb.qexec.QueryExecutionException;
 import de.tuberlin.dima.minidb.util.Pair;
+import de.tuberlin.dima.minidb.io.cache.CacheableData;
 import java.util.ArrayList;
 
-public class TablePage {
+public class TablePage implements CacheableData{
 
 
     private TableSchema schema;
@@ -24,7 +25,7 @@ public class TablePage {
 
     private boolean beenModified = false;
     private boolean expired = false;
-    public TablePage(TableSchema schema, byte[] binPage, int pageNum){
+    public TablePage(TableSchema schema, byte[] binPage, int pageNum) {
 
         this.schema = schema;
         this.binPage = binPage;
@@ -383,5 +384,10 @@ public class TablePage {
 
         IntField metadata = new IntField(1);
         metadata.encodeBinary(this.binPage, recordOffset);
+    }
+
+    public TableSchema getSchema(){
+
+        return this.schema;
     }
 }
