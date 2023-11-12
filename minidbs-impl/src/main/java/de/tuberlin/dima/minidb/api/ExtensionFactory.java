@@ -52,7 +52,7 @@ public class ExtensionFactory extends AbstractExtensionFactory {
 
 	@Override
 	public PageCache createPageCache(PageSize pageSize, int numPages) {
-		throw new UnsupportedOperationException("Method not yet supported");
+		return new PageCache(pageSize, numPages);
 	}
 
 	@Override

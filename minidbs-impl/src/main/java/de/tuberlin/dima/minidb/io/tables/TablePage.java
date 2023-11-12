@@ -99,6 +99,11 @@ public class TablePage implements CacheableData{
         return binPage;
     }
 
+    public void setBuffer(byte[] buf)
+    {
+        this.binPage = buf;
+    }
+
     public int getNumRecordsOnPage(){
 
         this.throwExceptionIfExpired();
