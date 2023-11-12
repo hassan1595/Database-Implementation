@@ -131,7 +131,7 @@ public class PageCache {
                 , 0, bufdest.length);
     }
 
-    public boolean checkBlist(ArrayList<Pair<Integer, Integer>> Blist, int resourceId, int pageNum)
+    private boolean checkBlist(ArrayList<Pair<Integer, Integer>> Blist, int resourceId, int pageNum)
     {
 
         for(Pair<Integer, Integer> resourceIdPageNum: Blist)
@@ -537,29 +537,4 @@ public class PageCache {
         }
     }
 
-    public  int getSizeT1()
-    {
-        return this.listT1.size();
-    }
-    public  int getSizeT2()
-    {
-        return this.listT2.size();
-    }
-
-    public int getSizeB1()
-    {
-        return this.listB1.size();
-    }
-    public int getSizeB2()
-    {
-        return this.listB2.size();
-    }
-
-    public ArrayList<Pair<Integer, Integer>> getListB1(){
-        return this.listB1;
-    }
-
-    public ArrayList<Pair<Integer, Integer>> getListB2(){
-        return this.listB2;
-    }
 }
