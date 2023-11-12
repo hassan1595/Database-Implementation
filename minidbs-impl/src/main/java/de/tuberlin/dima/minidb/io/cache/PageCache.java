@@ -131,7 +131,7 @@ public class PageCache {
                 , 0, bufdest.length);
     }
 
-    private boolean checkBlist(ArrayList<Pair<Integer, Integer>> Blist, int resourceId, int pageNum)
+    public boolean checkBlist(ArrayList<Pair<Integer, Integer>> Blist, int resourceId, int pageNum)
     {
 
         for(Pair<Integer, Integer> resourceIdPageNum: Blist)
@@ -263,10 +263,10 @@ public class PageCache {
         {
 
             CacheData cdOld = this.listT1.remove(toEvictTIndex);
+            Pair<Integer, Integer> b1Pair = new Pair<>(cdOld.getResourceId(), cdOld.getPage().getPageNumber());
             byte[] evictedByteArray = new byte[this.pageSize.getNumberOfBytes()];
             this.replacePage(evictedByteArray, this.binaryPageArray[cdOld.getPagIdx()]);
             this.replacePage(  newPage.getBuffer(), this.binaryPageArray[cdOld.getPagIdx()]);
-            Pair<Integer, Integer> b1Pair = new Pair<>(cdOld.getResourceId(), cdOld.getPage().getPageNumber());
             this.listB1.add(0,b1Pair);
             ((TablePage) newPage).setBuffer(this.binaryPageArray[cdOld.getPagIdx()]);
             CacheData cdNew = new CacheData(resourceId, newPage, cdOld.getPagIdx());
@@ -281,10 +281,10 @@ public class PageCache {
             {
 
                 CacheData cdOld = this.listT2.remove(toEvictTIndex);
+                Pair<Integer, Integer> b2Pair = new Pair<>(cdOld.getResourceId(), cdOld.getPage().getPageNumber());
                 byte[] evictedByteArray = new byte[this.pageSize.getNumberOfBytes()];
                 this.replacePage(this.binaryPageArray[cdOld.getPagIdx()], evictedByteArray);
                 this.replacePage(  newPage.getBuffer(), this.binaryPageArray[cdOld.getPagIdx()]);
-                Pair<Integer, Integer> b2Pair = new Pair<>(cdOld.getResourceId(), cdOld.getPage().getPageNumber());
                 this.listB2.add(0,b2Pair);
                 ((TablePage) newPage).setBuffer(this.binaryPageArray[cdOld.getPagIdx()]);
                 CacheData cdNew = new CacheData(resourceId, newPage, cdOld.getPagIdx());
@@ -303,10 +303,10 @@ public class PageCache {
             if(toEvictTIndex != -1)
             {
                 CacheData cdOld = this.listT1.remove(toEvictTIndex);
+                Pair<Integer, Integer> b1Pair = new Pair<>(cdOld.getResourceId(), cdOld.getPage().getPageNumber());
                 byte[] evictedByteArray = new byte[this.pageSize.getNumberOfBytes()];
                 this.replacePage(this.binaryPageArray[cdOld.getPagIdx()], evictedByteArray);
                 this.replacePage(  newPage.getBuffer(), this.binaryPageArray[cdOld.getPagIdx()]);
-                Pair<Integer, Integer> b1Pair = new Pair<>(cdOld.getResourceId(), cdOld.getPage().getPageNumber());
                 this.listB1.add(0,b1Pair);
                 ((TablePage) newPage).setBuffer(this.binaryPageArray[cdOld.getPagIdx()]);
                 CacheData cdNew = new CacheData(resourceId, newPage, cdOld.getPagIdx());
@@ -324,10 +324,11 @@ public class PageCache {
                 {
 
                     CacheData cdOld = this.listT2.remove(toEvictTIndex);
+                    Pair<Integer, Integer> b2Pair = new Pair<>(cdOld.getResourceId(), cdOld.getPage().getPageNumber());
                     byte[] evictedByteArray = new byte[this.pageSize.getNumberOfBytes()];
                     this.replacePage(this.binaryPageArray[cdOld.getPagIdx()], evictedByteArray);
                     this.replacePage(  newPage.getBuffer(), this.binaryPageArray[cdOld.getPagIdx()]);
-                    Pair<Integer, Integer> b2Pair = new Pair<>(cdOld.getResourceId(), cdOld.getPage().getPageNumber());
+
                     this.listB2.add(0,b2Pair);
                     ((TablePage) newPage).setBuffer(this.binaryPageArray[cdOld.getPagIdx()]);
                     CacheData cdNew = new CacheData(resourceId, newPage, cdOld.getPagIdx());
@@ -348,14 +349,16 @@ public class PageCache {
         }
         else
         {
+//            DO NOT WRITE PAGE FIRST
             toEvictTIndex= this.findNearestUnpinned(this.listT2);
             if(toEvictTIndex != -1) {
 
                 CacheData cdOld = this.listT2.remove(toEvictTIndex);
+                Pair<Integer, Integer> b2Pair = new Pair<>(cdOld.getResourceId(), cdOld.getPage().getPageNumber());
                 byte[] evictedByteArray = new byte[this.pageSize.getNumberOfBytes()];
                 this.replacePage(this.binaryPageArray[cdOld.getPagIdx()], evictedByteArray);
                 this.replacePage(  newPage.getBuffer(), this.binaryPageArray[cdOld.getPagIdx()]);
-                Pair<Integer, Integer> b2Pair = new Pair<>(cdOld.getResourceId(), cdOld.getPage().getPageNumber());
+
                 this.listB2.add(0,b2Pair);
                 CacheData cdNew = new CacheData(resourceId, newPage, cdOld.getPagIdx());
                 if(pin){
@@ -372,10 +375,11 @@ public class PageCache {
                 if(toEvictTIndex != -1)
                 {
                     CacheData cdOld = this.listT1.remove(toEvictTIndex);
+                    Pair<Integer, Integer> b1Pair = new Pair<>(cdOld.getResourceId(), cdOld.getPage().getPageNumber());
                     byte[] evictedByteArray = new byte[this.pageSize.getNumberOfBytes()];
                     this.replacePage(this.binaryPageArray[cdOld.getPagIdx()], evictedByteArray);
                     this.replacePage(  newPage.getBuffer(), this.binaryPageArray[cdOld.getPagIdx()]);
-                    Pair<Integer, Integer> b1Pair = new Pair<>(cdOld.getResourceId(), cdOld.getPage().getPageNumber());
+
                     this.listB1.add(0,b1Pair);
                     CacheData cdNew = new CacheData(resourceId, newPage, cdOld.getPagIdx());
                     if(pin){
@@ -549,5 +553,13 @@ public class PageCache {
     public int getSizeB2()
     {
         return this.listB2.size();
+    }
+
+    public ArrayList<Pair<Integer, Integer>> getListB1(){
+        return this.listB1;
+    }
+
+    public ArrayList<Pair<Integer, Integer>> getListB2(){
+        return this.listB2;
     }
 }

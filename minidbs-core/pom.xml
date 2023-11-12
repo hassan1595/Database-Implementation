@@ -3,7 +3,7 @@
 
     <parent>
         <groupId>de.tuberlin.dima</groupId>
-        <artifactId>minidbs</artifactId>
+        <artifactId>mini-dbs</artifactId>
         <version>1.0.0-SNAPSHOT</version>
         <relativePath>..</relativePath>
     </parent>
