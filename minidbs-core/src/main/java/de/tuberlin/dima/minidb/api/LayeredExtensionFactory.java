@@ -39,7 +39,7 @@ public final class LayeredExtensionFactory extends AbstractExtensionFactory {
     private List<AbstractExtensionFactory> factories = new ArrayList<AbstractExtensionFactory>();
 
     public LayeredExtensionFactory() throws ExtensionInitFailedException {
-        this.registerFactory("de.tuberlin.dima.minidb.api.ReferenceExtensionFactory", false); // optional
+//        this.registerFactory("de.tuberlin.dima.minidb.api.ReferenceExtensionFactory", false); // optional
         this.registerFactory("de.tuberlin.dima.minidb.api.ExtensionFactory", true); // required
     }
 
