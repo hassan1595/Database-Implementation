@@ -65,7 +65,7 @@ public class PageCache {
             CacheData cacheData = this.listT1.get(i);
 
             if (cacheData.getResourceId() == resourceId
-                    && cacheData.getPage().getPageNumber() == pageNumber) {
+                    && cacheData.getPage().getPageNumber() == pageNumber && !cacheData.getEviction()) {
 
                 if(pin)
                 {
@@ -96,7 +96,7 @@ public class PageCache {
             CacheData cacheData = this.listT2.get(i);
 
             if (cacheData.getResourceId() == resourceId
-                    && cacheData.getPage().getPageNumber() == pageNumber) {
+                    && cacheData.getPage().getPageNumber() == pageNumber && !cacheData.getEviction()) {
                 if(pin)
                 {
                     cacheData.setPinNumber(cacheData.getPinNumber() +1);
@@ -108,7 +108,6 @@ public class PageCache {
             }
         }
 
-//        change adaptation
         return null;
 
     }
