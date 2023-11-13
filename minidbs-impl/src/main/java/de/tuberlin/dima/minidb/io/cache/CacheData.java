@@ -1,20 +1,15 @@
 package de.tuberlin.dima.minidb.io.cache;
 
-import de.tuberlin.dima.minidb.io.tables.TablePage;
+public class CacheData {
 
-public class CacheData{
-
-    private CacheableData page;
-    private int resourceId;
+    private final CacheableData page;
+    private final int resourceId;
+    private final int pagIdx;
     private int pinNumber;
-
-    private int pagIdx;
-
     private boolean eviction;
-
     private boolean prefetched;
 
-    public CacheData(int resourceId, CacheableData page, int pagIdx){
+    public CacheData(int resourceId, CacheableData page, int pagIdx) {
         this.resourceId = resourceId;
         this.page = page;
         this.pinNumber = 0;
@@ -23,13 +18,12 @@ public class CacheData{
         this.prefetched = true;
     }
 
-
     public int getPinNumber() {
         return pinNumber;
     }
 
     public void setPinNumber(int pinNumber) {
-        this.pinNumber = Math.max(0,pinNumber);
+        this.pinNumber = Math.max(0, pinNumber);
     }
 
     public int getResourceId() {
@@ -44,20 +38,19 @@ public class CacheData{
         return pagIdx;
     }
 
-    public void toEvict(){
+    public void toEvict() {
         this.eviction = true;
     }
 
-    public boolean getEviction(){
+    public boolean getEviction() {
         return this.eviction;
     }
 
-    public boolean getPrefetched()
-    {
+    public boolean getPrefetched() {
         return this.prefetched;
     }
 
-    public void setPrefetched(boolean prefetched){
+    public void setPrefetched(boolean prefetched) {
         this.prefetched = prefetched;
     }
 }
