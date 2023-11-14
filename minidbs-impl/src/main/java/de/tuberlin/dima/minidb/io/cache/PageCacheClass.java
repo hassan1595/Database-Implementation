@@ -1,6 +1,7 @@
 package de.tuberlin.dima.minidb.io.cache;
 
 import de.tuberlin.dima.minidb.io.tables.TablePage;
+import de.tuberlin.dima.minidb.io.tables.TablePageClass;
 import de.tuberlin.dima.minidb.util.Pair;
 
 import java.util.ArrayList;
@@ -164,7 +165,7 @@ public class PageCacheClass implements PageCache {
         if (freeEvictIndex != -1) {
             byte[] evictedByteArray = new byte[this.pageSize.getNumberOfBytes()];
             this.replacePage(newPage.getBuffer(), this.binaryPageArray[freeEvictIndex]);
-            ((TablePage) newPage).setBuffer(this.binaryPageArray[freeEvictIndex]);
+            ((TablePageClass) newPage).setBuffer(this.binaryPageArray[freeEvictIndex]);
             CacheData cdNew = new CacheData(resourceId, newPage, freeEvictIndex);
             this.addToTAndChangeAdapt(cdNew);
 
@@ -181,10 +182,10 @@ public class PageCacheClass implements PageCache {
             this.replacePage(evictedByteArray, this.binaryPageArray[cdOld.getPagIdx()]);
             this.replacePage(newPage.getBuffer(), this.binaryPageArray[cdOld.getPagIdx()]);
             this.listB1.add(0, b1Pair);
-            ((TablePage) newPage).setBuffer(this.binaryPageArray[cdOld.getPagIdx()]);
+            ((TablePageClass) newPage).setBuffer(this.binaryPageArray[cdOld.getPagIdx()]);
             CacheData cdNew = new CacheData(resourceId, newPage, cdOld.getPagIdx());
             this.addToTAndChangeAdapt(cdNew);
-            ((TablePage) cdOld.getPage()).setBuffer(evictedByteArray);
+            ((TablePageClass) cdOld.getPage()).setBuffer(evictedByteArray);
             return new EvictedCacheEntry(evictedByteArray, cdOld.getPage(), cdOld.getResourceId());
         } else {
             toEvictTIndex = this.findEvicted(this.listT2);
@@ -195,10 +196,10 @@ public class PageCacheClass implements PageCache {
                 this.replacePage(this.binaryPageArray[cdOld.getPagIdx()], evictedByteArray);
                 this.replacePage(newPage.getBuffer(), this.binaryPageArray[cdOld.getPagIdx()]);
                 this.listB2.add(0, b2Pair);
-                ((TablePage) newPage).setBuffer(this.binaryPageArray[cdOld.getPagIdx()]);
+                ((TablePageClass) newPage).setBuffer(this.binaryPageArray[cdOld.getPagIdx()]);
                 CacheData cdNew = new CacheData(resourceId, newPage, cdOld.getPagIdx());
                 this.addToTAndChangeAdapt(cdNew);
-                ((TablePage) cdOld.getPage()).setBuffer(evictedByteArray);
+                ((TablePageClass) cdOld.getPage()).setBuffer(evictedByteArray);
                 return new EvictedCacheEntry(evictedByteArray, cdOld.getPage(), cdOld.getResourceId());
             }
         }
@@ -213,7 +214,7 @@ public class PageCacheClass implements PageCache {
                 this.replacePage(this.binaryPageArray[cdOld.getPagIdx()], evictedByteArray);
                 this.replacePage(newPage.getBuffer(), this.binaryPageArray[cdOld.getPagIdx()]);
                 this.listB1.add(0, b1Pair);
-                ((TablePage) newPage).setBuffer(this.binaryPageArray[cdOld.getPagIdx()]);
+                ((TablePageClass) newPage).setBuffer(this.binaryPageArray[cdOld.getPagIdx()]);
                 CacheData cdNew = new CacheData(resourceId, newPage, cdOld.getPagIdx());
 
                 if (pin) {
@@ -221,7 +222,7 @@ public class PageCacheClass implements PageCache {
                 }
 
                 this.addToTAndChangeAdapt(cdNew);
-                ((TablePage) cdOld.getPage()).setBuffer(evictedByteArray);
+                ((TablePageClass) cdOld.getPage()).setBuffer(evictedByteArray);
                 return new EvictedCacheEntry(evictedByteArray, cdOld.getPage(), cdOld.getResourceId());
             } else {
                 toEvictTIndex = this.findNearestUnpinned(this.listT2);
@@ -232,7 +233,7 @@ public class PageCacheClass implements PageCache {
                     this.replacePage(this.binaryPageArray[cdOld.getPagIdx()], evictedByteArray);
                     this.replacePage(newPage.getBuffer(), this.binaryPageArray[cdOld.getPagIdx()]);
                     this.listB2.add(0, b2Pair);
-                    ((TablePage) newPage).setBuffer(this.binaryPageArray[cdOld.getPagIdx()]);
+                    ((TablePageClass) newPage).setBuffer(this.binaryPageArray[cdOld.getPagIdx()]);
                     CacheData cdNew = new CacheData(resourceId, newPage, cdOld.getPagIdx());
 
                     if (pin) {
@@ -240,7 +241,7 @@ public class PageCacheClass implements PageCache {
                     }
 
                     this.addToTAndChangeAdapt(cdNew);
-                    ((TablePage) cdOld.getPage()).setBuffer(evictedByteArray);
+                    ((TablePageClass) cdOld.getPage()).setBuffer(evictedByteArray);
 
                     return new EvictedCacheEntry(evictedByteArray, cdOld.getPage(), cdOld.getResourceId());
                 } else {
@@ -264,7 +265,7 @@ public class PageCacheClass implements PageCache {
                 }
 
                 this.addToTAndChangeAdapt(cdNew);
-                ((TablePage) cdOld.getPage()).setBuffer(evictedByteArray);
+                ((TablePageClass) cdOld.getPage()).setBuffer(evictedByteArray);
 
                 return new EvictedCacheEntry(evictedByteArray, cdOld.getPage(), cdOld.getResourceId());
             } else {
@@ -283,7 +284,7 @@ public class PageCacheClass implements PageCache {
                     }
 
                     this.addToTAndChangeAdapt(cdNew);
-                    ((TablePage) cdOld.getPage()).setBuffer(evictedByteArray);
+                    ((TablePageClass) cdOld.getPage()).setBuffer(evictedByteArray);
 
                     return new EvictedCacheEntry(evictedByteArray, cdOld.getPage(), cdOld.getResourceId());
                 } else {

@@ -14,6 +14,7 @@ import de.tuberlin.dima.minidb.io.cache.PageSize;
 import de.tuberlin.dima.minidb.io.index.BTreeIndex;
 import de.tuberlin.dima.minidb.io.manager.BufferPoolManager;
 import de.tuberlin.dima.minidb.io.tables.TablePage;
+import de.tuberlin.dima.minidb.io.tables.TablePageClass;
 import de.tuberlin.dima.minidb.io.tables.TableResourceManager;
 import de.tuberlin.dima.minidb.mapred.TableInputFormat;
 import de.tuberlin.dima.minidb.mapred.qexec.BulkProcessingOperator;
@@ -43,12 +44,12 @@ public class ExtensionFactory extends AbstractExtensionFactory {
 
 	@Override
 	public TablePage createTablePage(TableSchema schema, byte[] binaryPage) throws PageFormatException {
-		return new TablePage(schema, binaryPage);
+		return new TablePageClass(schema, binaryPage);
 	}
 
 	@Override
 	public TablePage initTablePage(TableSchema schema, byte[] binaryPage, int newPageNumber) throws PageFormatException {
-		return new TablePage(schema, binaryPage, newPageNumber);
+		return new TablePageClass(schema, binaryPage, newPageNumber);
 	}
 
 	@Override
