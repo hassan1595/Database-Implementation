@@ -5,7 +5,7 @@ import de.tuberlin.dima.minidb.util.Pair;
 
 import java.util.ArrayList;
 
-public class PageCache {
+public class PageCacheClass implements PageCache {
 
     private final PageSize pageSize;
     private final int numPages;
@@ -17,7 +17,7 @@ public class PageCache {
     private float adaptation;
     private int freeIdx;
 
-    public PageCache(PageSize pageSize, int numPages) {
+    public PageCacheClass(PageSize pageSize, int numPages) {
         this.pageSize = pageSize;
         this.numPages = numPages;
         this.binaryPageArray = new byte[numPages][pageSize.getNumberOfBytes()];
@@ -71,11 +71,11 @@ public class PageCache {
 
         return null;
     }
-
+    @Override
     public CacheableData getPage(int resourceId, int pageNumber) {
         return this.getPageAndPinOpt(resourceId, pageNumber, false);
     }
-
+    @Override
     public CacheableData getPageAndPin(int resourceId, int pageNumber) {
         return this.getPageAndPinOpt(resourceId, pageNumber, true);
     }
@@ -318,15 +318,15 @@ public class PageCache {
             return this.getAndAdapt(newPage, resourceId, -1, false, pin);
         }
     }
-
+    @Override
     public EvictedCacheEntry addPage(CacheableData newPage, int resourceId) throws DuplicateCacheEntryException, CachePinnedException {
         return addPagepinOpt(newPage, resourceId, false);
     }
-
+    @Override
     public EvictedCacheEntry addPageAndPin(CacheableData newPage, int resourceId) throws DuplicateCacheEntryException, CachePinnedException {
         return addPagepinOpt(newPage, resourceId, true);
     }
-
+    @Override
     public void unpinPage(int resourceId, int pageNumber) {
         for (CacheData cacheData : this.listT1) {
             if (cacheData.getResourceId() == resourceId && cacheData.getPage().getPageNumber() == pageNumber) {
@@ -340,7 +340,7 @@ public class PageCache {
             }
         }
     }
-
+    @Override
     public void unpinAllPages() {
         for (CacheData cacheData : this.listT1) {
             cacheData.setPinNumber(0);
@@ -350,11 +350,11 @@ public class PageCache {
             cacheData.setPinNumber(0);
         }
     }
-
+    @Override
     public int getCapacity() {
         return this.numPages;
     }
-
+    @Override
     public CacheableData[] getAllPagesForResource(int resourceId) {
         ArrayList<CacheableData> cads = new ArrayList<>();
         for (CacheData cd : this.listT1) {
@@ -374,7 +374,7 @@ public class PageCache {
 
         return cads.toArray(cads_arr);
     }
-
+    @Override
     public void expelAllPagesForResource(int resourceId) {
 
 

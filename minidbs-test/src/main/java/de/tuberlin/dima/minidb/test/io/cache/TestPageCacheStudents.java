@@ -199,7 +199,7 @@ public class TestPageCacheStudents
 
 
 	/**
-	 * Tests the cache behavior assuming ARC implementation. 
+	 * Tests the cache behavior assuming ARC implementation.
 	 */
 	@Test
 	public void testCacheBehavior() throws Exception
