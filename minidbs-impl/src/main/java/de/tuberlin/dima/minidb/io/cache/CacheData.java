@@ -4,16 +4,15 @@ public class CacheData {
 
     private final CacheableData page;
     private final int resourceId;
-    private final int pagIdx;
+
     private int pinNumber;
     private boolean eviction;
     private boolean prefetched;
 
-    public CacheData(int resourceId, CacheableData page, int pagIdx) {
+    public CacheData(int resourceId, CacheableData page) {
         this.resourceId = resourceId;
         this.page = page;
         this.pinNumber = 0;
-        this.pagIdx = pagIdx;
         this.eviction = false;
         this.prefetched = true;
     }
@@ -34,9 +33,6 @@ public class CacheData {
         return page;
     }
 
-    public int getPagIdx() {
-        return pagIdx;
-    }
 
     public void toEvict() {
         this.eviction = true;

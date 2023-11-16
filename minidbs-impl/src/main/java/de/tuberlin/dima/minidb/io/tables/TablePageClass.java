@@ -11,7 +11,7 @@ import de.tuberlin.dima.minidb.util.Pair;
 
 import java.util.ArrayList;
 
-public class TablePageClass implements TablePage, CacheableData {
+public class TablePageClass implements TablePage{
 
 
     private final TableSchema schema;
@@ -304,11 +304,6 @@ public class TablePageClass implements TablePage, CacheableData {
         int recordOffset = this.TABLE_DATA_PAGE_HEADER_BYTES + recordWidth * i;
         IntField metadata = new IntField(1);
         metadata.encodeBinary(this.binPage, recordOffset);
-    }
-
-    public void setBuffer(byte[] newBuf){
-
-        this.binPage = newBuf;
     }
 
 }
