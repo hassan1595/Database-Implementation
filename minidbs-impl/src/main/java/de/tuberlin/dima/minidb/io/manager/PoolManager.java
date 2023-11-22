@@ -1,19 +1,18 @@
 package de.tuberlin.dima.minidb.io.manager;
 import de.tuberlin.dima.minidb.Config;
 import de.tuberlin.dima.minidb.io.cache.*;
-import org.apache.commons.lang.NotImplementedException;
-
 import java.io.IOException;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 
 public class PoolManager implements BufferPoolManager {
 
 
     private HashMap<Integer, ResourceManager> resourceManagers;
     private HashMap<PageSize, PageCacheClass> pageCaches;
-    private HashMap<PageSize, Queue<byte[]>> freeBufferCollection;
+    private HashMap<PageSize, LinkedList<byte[]>> freeBufferCollection;
 
     private List<LinkedList<LoadQueueEntry>> loadQueue;
     // simple queue without command stuff
@@ -45,11 +44,11 @@ public class PoolManager implements BufferPoolManager {
 
 
     private byte[] getFreeBuffer(PageSize pageSize) throws BufferPoolException {
-        Queue queue = this.freeBufferCollection.get(pageSize);
-        if (queue.isEmpty()) {
+        if (this.freeBufferCollection.get(pageSize).isEmpty()) {
             throw new BufferPoolException("No free buffers available");
         }
-        return (byte[]) queue.poll();
+        Queue freeBuffers = this.freeBufferCollection.get(pageSize);
+        return (byte[]) freeBuffers.poll();
     }
 
 
@@ -155,12 +154,56 @@ public class PoolManager implements BufferPoolManager {
         if (this.isClosed) {
             throw new BufferPoolException("The pool is closed");
         }
-        return null;
+        // unpin the given page
+        this.unpinPage(resourceId, unpinPageNumber);
+        // fetch the resource manager
+        ResourceManager resourceManager = this.resourceManagers.get(resourceId);
+        // fetch the page size of the resource manager
+        PageSize pageSize = resourceManager.getPageSize();
+        // fetch the page cache for this page size
+        PageCache pageCache = this.pageCaches.get(pageSize);
+        // check if the page is in the cache
+        CacheableData data = pageCache.getPageAndPin(resourceId, getPageNumber);
+        if (data != null) {
+            // page is in cache and we do not involve the disk
+            return data;
+        } else {
+            // we have a cache miss and need to load the page from disk
+            // create a new load queue entry
+            LoadQueueEntry entry = new LoadQueueEntry(
+                    resourceId,
+                    getPageNumber,
+                    resourceManager,
+                    pageCache,
+                    true
+            );
+            // push the entry to the queue
+            // TODO: group page requests by page id as given in lecture slides
+            this.simpleLoadQueue.push(entry);
+            synchronized (entry) {
+                while (!entry.isCompleted()) {
+                    try {
+                        entry.wait();
+                    } catch (InterruptedException e) {
+                        logger.log(Level.SEVERE, e.toString());
+                    }
+                }
+            }
+            return entry.getResultPage();
+        }
     }
+
 
     @Override
     public void unpinPage(int resourceId, int pageNumber) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        // get the resource manager
+        ResourceManager manager = this.resourceManagers.get(resourceId);
+        // get the page size of the resource manager
+        PageSize pageSize = manager.getPageSize();
+        // get the page cache
+        PageCache pageCache = this.pageCaches.get(pageSize);
+        // unpin the page
+        pageCache.unpinPage(resourceId, pageNumber);
     }
 
     @Override
@@ -180,6 +223,9 @@ public class PoolManager implements BufferPoolManager {
 
     @Override
     public CacheableData createNewPageAndPin(int resourceId) throws BufferPoolException, IOException {
+        // TODO: are we correct in assuming that this function is not involving the disk?
+        // TODO: if that is the case, why are we getting more pages in the corresponding test than we have buffers?
+        // TODO: what is the lifecycle of a buffer in this case?
         if (this.isClosed) {
             throw new BufferPoolException("The pool is closed");
         }
@@ -250,19 +296,10 @@ public class PoolManager implements BufferPoolManager {
         public void run() {
             while (this.isAlive) {
                 // check if the load queue is not empty
-                if (simpleLoadQueue.isEmpty()) {
-                    try {
-                        Thread.sleep(1);
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
-                } else {
-                    // get the request
+                if (!simpleLoadQueue.isEmpty()) {
                     // TODO: how do determine which load queue to poll from?
-                    LoadQueueEntry request = loadQueue.get(0).poll();
-                    // retrieve the amount of free buffers necessary to complete the request
-                    // TODO: how is this possible? it appears that each entry represents a request for one page
-                    // assume for now that each request indeed has only page
+                    // TODO: how to retrieve the amount of pages required ? it appears that each entry represents a request for one page
+                    LoadQueueEntry request = simpleLoadQueue.poll();
                     int resourceId = request.getResourceId();
                     ResourceManager resourceManager = request.getResourceManager();
                     PageSize pageSize = resourceManager.getPageSize();
@@ -321,13 +358,7 @@ public class PoolManager implements BufferPoolManager {
         public void run() {
             while (this.isAlive) {
                 // check if the write queue is not empty
-                if (simpleWriteQueue.isEmpty()) {
-                    try {
-                        Thread.sleep(1);
-                    } catch (InterruptedException e) {
-                        logger.log(Level.SEVERE, e.toString());
-                    }
-                } else {
+                if (!simpleWriteQueue.isEmpty()) {
                     // get the request data
                     WriteQueueEntry entry = simpleWriteQueue.poll();
                     ResourceManager resourceManager = entry.getResourceManager();
