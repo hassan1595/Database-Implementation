@@ -115,7 +115,8 @@ public class PageCacheClass implements PageCache {
         }
 
         if (this.listT1.size() == numPages && this.listB1.isEmpty()) {
-            this.listT1.remove(this.listT1.size() - 1);
+            int idx = this.findNearestUnpinned(this.listT1);
+            this.listT1.remove(idx);
         }
 
         if (this.listT1.size() + this.listB1.size() < this.numPages && this.listT1.size() + this.listB1.size() + this.listT2.size() + this.listB2.size() == 2 * this.numPages) {
@@ -157,10 +158,15 @@ public class PageCacheClass implements PageCache {
         if (freeEvictIndex != -1) {
             byte[] evictedByteArray = new byte[this.pageSize.getNumberOfBytes()];
             CacheData cdNew = new CacheData(resourceId, newPage);
+            if (pin) {
+                cdNew.setPinNumber(cdNew.getPinNumber() + 1);
+            }
             this.addToTAndChangeAdapt(cdNew);
 
             return new EvictedCacheEntry(evictedByteArray);
         }
+
+
 
         int toEvictTIndex = -1;
         // search expelled paged and replace
@@ -170,6 +176,9 @@ public class PageCacheClass implements PageCache {
             Pair<Integer, Integer> b1Pair = new Pair<>(cdOld.getResourceId(), cdOld.getPage().getPageNumber());
             this.listB1.add(0, b1Pair);
             CacheData cdNew = new CacheData(resourceId, newPage);
+            if (pin) {
+                cdNew.setPinNumber(cdNew.getPinNumber() + 1);
+            }
             this.addToTAndChangeAdapt(cdNew);
             return new EvictedCacheEntry(cdOld.getPage().getBuffer(), cdOld.getPage(), cdOld.getResourceId());
         } else {
@@ -179,6 +188,9 @@ public class PageCacheClass implements PageCache {
                 Pair<Integer, Integer> b2Pair = new Pair<>(cdOld.getResourceId(), cdOld.getPage().getPageNumber());
                 this.listB2.add(0, b2Pair);
                 CacheData cdNew = new CacheData(resourceId, newPage);
+                if (pin) {
+                    cdNew.setPinNumber(cdNew.getPinNumber() + 1);
+                }
                 this.addToTAndChangeAdapt(cdNew);
                 return new EvictedCacheEntry(cdOld.getPage().getBuffer(), cdOld.getPage(), cdOld.getResourceId());
             }
@@ -271,6 +283,7 @@ public class PageCacheClass implements PageCache {
         // case a
         if (!this.listT1.isEmpty() && (this.listT1.size() > this.adaptation || (this.listT1.size() == this.adaptation && checkBlist(this.listB2, resourceId, newPage.getPageNumber())))) {
             this.evictBlists(resourceId, newPage.getPageNumber());
+
             return this.getAndAdapt(newPage, resourceId, -1, true, pin);
         } else {
             // case b
@@ -284,6 +297,7 @@ public class PageCacheClass implements PageCache {
     }
     @Override
     public EvictedCacheEntry addPageAndPin(CacheableData newPage, int resourceId) throws DuplicateCacheEntryException, CachePinnedException {
+
         return addPagepinOpt(newPage, resourceId, true);
     }
     @Override

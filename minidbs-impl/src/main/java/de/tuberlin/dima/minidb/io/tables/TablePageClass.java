@@ -125,6 +125,7 @@ public class TablePageClass implements TablePage{
     public boolean insertTuple(DataTuple tuple) throws PageExpiredException, PageFormatException {
         this.throwExceptionIfExpired();
 
+        this.beenModified = true;
         int rWidth = IntField.getFieldFromBinary(this.binPage, this.OFFSET_RECORD_WIDTH).getValue();
         int beforeVarOffset = IntField.getFieldFromBinary(this.binPage, this.OFFSET_VARIABLE_OFFSET).getValue();
 
