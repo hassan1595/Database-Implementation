@@ -1,9 +1,6 @@
 package de.tuberlin.dima.minidb.io.manager;
 import de.tuberlin.dima.minidb.Config;
 import de.tuberlin.dima.minidb.io.cache.*;
-import de.tuberlin.dima.minidb.io.tables.TablePage;
-
-import javax.sound.midi.SysexMessage;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -15,21 +12,15 @@ import java.util.logging.Logger;
 
 
 public class PoolManager implements BufferPoolManager {
-
-
     private HashMap<Integer, ResourceManager> resourceManagers;
-    private ConcurrentHashMap<Integer, PageCache> pageCaches;
-    private ConcurrentHashMap<Integer, ConcurrentLinkedQueue<byte[]>> freeBufferCollection;
-
+    private ConcurrentHashMap<PageSize, PageCache> pageCaches;
+    private ConcurrentHashMap<PageSize, ConcurrentLinkedQueue<byte[]>> freeBufferCollection;
     private LinkedBlockingQueue<LoadQueueEntry> simpleLoadQueue;
     private LinkedBlockingQueue<WriteQueueEntry> simpleWriteQueue;
-
     private Config config;
     private Logger logger;
-
     private ReadThread readThread;
     private WriteThread writeThread;
-
     private boolean isClosed;
 
 
@@ -72,16 +63,8 @@ public class PoolManager implements BufferPoolManager {
         // we can shut down the read thread immediately and discard any read requests
         this.isClosed = true;
         this.readThread.shutdown();
-        this.simpleLoadQueue.clear();
-        // wait for the write thread to finish
         this.writeThread.shutdown();
-        while (this.writeThread.isProcessing()) {
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                logger.log(Level.SEVERE, e.toString());
-            }
-        }
+        this.writeThread.interrupt();
     }
 
 
@@ -126,7 +109,6 @@ public class PoolManager implements BufferPoolManager {
             // page is in cache and we do not involve the disk
             return data;
         } else {
-
             // we have a cache miss and need to load the page from disk
             // create a new load queue entry
             LoadQueueEntry entry = new LoadQueueEntry(
@@ -166,8 +148,6 @@ public class PoolManager implements BufferPoolManager {
         PageCache pageCache = this.pageCaches.get(pageSize.getNumberOfBytes());
         // check if the page is in the cache
         CacheableData data = pageCache.getPageAndPin(resourceId, getPageNumber);
-
-
         if (data != null) {
             // page is in cache and we do not involve the disk
             return data;
@@ -215,7 +195,6 @@ public class PoolManager implements BufferPoolManager {
         if (this.isClosed) {
             throw new BufferPoolException("The pool is closed");
         }
-
         ResourceManager manager = this.resourceManagers.get(resourceId);
         PageSize pageSize = manager.getPageSize() ;
         PageCache cache = this.pageCaches.get(pageSize.getNumberOfBytes());
@@ -247,7 +226,6 @@ public class PoolManager implements BufferPoolManager {
         if (this.isClosed) {
             throw new BufferPoolException("The pool is closed");
         }
-
         // get the manager for the provided id
         ResourceManager manager = this.resourceManagers.get(resourceId);
         if (manager == null) {
@@ -259,27 +237,20 @@ public class PoolManager implements BufferPoolManager {
         byte[] buffer = this.getFreeBuffer(pageSize);
         try {
             CacheableData page = manager.reserveNewPage(buffer);
-
-
-
-
             // get the page cache for this page size
             // TODO: check every read/write requests if it is already in the queue
             try {
                 PageCache pageCache = this.pageCaches.get(pageSize.getNumberOfBytes());
                 EvictedCacheEntry evictedEntry = pageCache.addPageAndPin(page, resourceId);
-
                 if (evictedEntry.getWrappingPage() != null && evictedEntry.getWrappingPage().hasBeenModified()) {
-
-
-                    simpleWriteQueue.offer(
-                            new WriteQueueEntry(
-                                    evictedEntry.getResourceID(),
-                                    evictedEntry.getPageNumber(),
-                                    manager,
-                                    evictedEntry.getBinaryPage(),
-                                    evictedEntry.getWrappingPage()
-                            ));
+                    WriteQueueEntry entry = new WriteQueueEntry(
+                            evictedEntry.getResourceID(),
+                            evictedEntry.getPageNumber(),
+                            manager,
+                            evictedEntry.getBinaryPage(),
+                            evictedEntry.getWrappingPage()
+                    );
+                    simpleWriteQueue.offer(entry);
                 } else {
                     byte[] rawPage = evictedEntry.getBinaryPage();
                     ConcurrentLinkedQueue<byte[]> bufferQueue = this.freeBufferCollection.get(pageSize.getNumberOfBytes());
@@ -312,8 +283,7 @@ public class PoolManager implements BufferPoolManager {
             // get the page cache for this page size
             PageCache pageCache = this.pageCaches.get(pageSize.getNumberOfBytes());
             try {
-                EvictedCacheEntry evictedEntry  = pageCache.addPageAndPin(page, resourceId);
-
+                pageCache.addPageAndPin(page, resourceId);
             } catch (DuplicateCacheEntryException e) {
                 throw new BufferPoolException("Page already in cache");
             } catch (CachePinnedException e) {
@@ -345,6 +315,27 @@ public class PoolManager implements BufferPoolManager {
                 LoadQueueEntry request = null;
                 try {
                     request = simpleLoadQueue.take();
+                    // check the write queue for the page in the request
+                    synchronized (simpleWriteQueue) {
+                        for (WriteQueueEntry entry : simpleWriteQueue) {
+                            if (entry.getResourceId() == request.getResourceId() && entry.getPageNumber() == request.getPageNumber()) {
+                                // page is in the write queue => we do not need to load it from disk
+                                PageCache cache = request.getTargetCache();
+                                try {
+                                    if (request.shouldPin()) {
+                                        cache.addPageAndPin(entry.getPage(), entry.getResourceId());
+                                    } else {
+                                        cache.addPage(entry.getPage(), entry.getResourceId());
+                                    }
+                                }
+                                catch (DuplicateCacheEntryException e) {
+                                    throw new RuntimeException(e);
+                                } catch (CachePinnedException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                        }
+                    }
                 } catch (InterruptedException e) {
                     this.isAlive = false;
                     return;
@@ -404,16 +395,10 @@ public class PoolManager implements BufferPoolManager {
 
         public void shutdown() {
             this.isAlive = false;
-            this.interrupt();
         }
-
-        public boolean isProcessing() {
-            return this.isAlive || !simpleWriteQueue.isEmpty();
-        }
-
         public void run() {
-            while (this.isAlive) {
-                WriteQueueEntry entry = null;
+            while (this.isAlive || !simpleWriteQueue.isEmpty()) {
+                WriteQueueEntry entry;
                 try {
                     entry = simpleWriteQueue.take();
                     ResourceManager resourceManager = entry.getResourceManager();
@@ -427,7 +412,6 @@ public class PoolManager implements BufferPoolManager {
                         logger.log(Level.SEVERE, e.toString());
                     }
                 } catch (InterruptedException e) {
-                    this.isAlive = false;
                     return;
                 }
             }
