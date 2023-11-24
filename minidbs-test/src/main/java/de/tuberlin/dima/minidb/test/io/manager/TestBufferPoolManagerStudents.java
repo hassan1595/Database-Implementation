@@ -331,7 +331,7 @@ public class TestBufferPoolManagerStudents extends AbstractTestBufferPoolManager
 			DataTuple tuple = generateTuple(schema);
 			// insert tuple into page
 			tp.insertTuple(tuple);
-			// flood cache with additional pages	
+			// flood cache with additional pages
 			for ( int i = 0; i < this.config.getCacheSize(PageSize.SIZE_8192) * 2; i++)
 			{
 				// create page
@@ -348,7 +348,7 @@ public class TestBufferPoolManagerStudents extends AbstractTestBufferPoolManager
 			// check that originally pinned page is still contained
 			CacheableData refetched = this.underTest.getPageAndPin(resource, data.getPageNumber());
 			TablePage tpRefetched = (TablePage) refetched;
-			try 
+			try
 			{
 				DataTuple tupleRefetched = tpRefetched.getDataTuple(0, Long.MAX_VALUE, schema.getNumberOfColumns());
 				LinkedList<Integer> newReadRequests = mrm.getReadRequests();
@@ -377,6 +377,7 @@ public class TestBufferPoolManagerStudents extends AbstractTestBufferPoolManager
 			
 			// check that originally pinned page is still contained
 			refetched = this.underTest.getPageAndPin(resource, data.getPageNumber());
+			System.out.println(refetched.getPageNumber());
 			tpRefetched = (TablePage) refetched;
 			try 
 			{
