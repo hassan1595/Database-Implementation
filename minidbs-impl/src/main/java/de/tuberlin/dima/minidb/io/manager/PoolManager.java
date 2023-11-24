@@ -1,20 +1,31 @@
 package de.tuberlin.dima.minidb.io.manager;
 import de.tuberlin.dima.minidb.Config;
 import de.tuberlin.dima.minidb.io.cache.*;
+import sun.awt.image.ImageWatched;
+
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.logging.Formatter;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.logging.*;
+
+/*
+TODO: group page requests by page id as given in lecture slides
+TODO: how do determine which load queue to poll from?
+TODO: always reuse buffers from the request queue entries
+ */
+
 
 
 
 public class PoolManager implements BufferPoolManager {
     private HashMap<Integer, ResourceManager> resourceManagers;
-    private ConcurrentHashMap<PageSize, PageCache> pageCaches;
-    private ConcurrentHashMap<PageSize, ConcurrentLinkedQueue<byte[]>> freeBufferCollection;
+    private ConcurrentHashMap<Integer, PageCache> pageCaches;
+    private ConcurrentHashMap<Integer, LinkedBlockingQueue<byte[]>> freeBufferCollection;
     private LinkedBlockingQueue<LoadQueueEntry> simpleLoadQueue;
     private LinkedBlockingQueue<WriteQueueEntry> simpleWriteQueue;
     private Config config;
@@ -24,29 +35,46 @@ public class PoolManager implements BufferPoolManager {
     private boolean isClosed;
 
 
+
     public PoolManager(Config config, Logger logger) {
         this.resourceManagers = new HashMap<>();
         this.pageCaches = new ConcurrentHashMap<>();
-        // buffers which are currently not in use
         this.freeBufferCollection = new ConcurrentHashMap<>();
         this.simpleLoadQueue = new LinkedBlockingQueue<>();
         this.simpleWriteQueue = new LinkedBlockingQueue<>();
 
         this.config = config;
-        this.logger = logger.getLogger("BufferPoolManager");
+        // required for throwing exceptions after the closing method has been called
         this.isClosed = false;
+        this.logger  = Logger.getLogger("BufferPoolManager");
+        logger.info(getLogMessage("Created buffer pool manager with %d IO buffers", config.getNumIOBuffers()));
+    }
+
+    private String getLogMessage(String message, Object... args) {
+        return String.format(String.format( message, args));
     }
 
 
     private byte[] getFreeBuffer(PageSize pageSize) throws BufferPoolException {
-        Queue<byte[]> freeBuffers = this.freeBufferCollection.get(pageSize.getNumberOfBytes());
-        byte[] freeBuffer = (byte[]) freeBuffers.poll();
+        LinkedBlockingQueue<byte[]> freeBuffers = this.freeBufferCollection.get(pageSize.getNumberOfBytes());
+        byte[] freeBuffer;
+        try {
+            this.logger.info(getLogMessage("Trying to pop buffer from free buffer collection with size %d", pageSize.getNumberOfBytes()));
+            freeBuffer = freeBuffers.take();
+            this.logger.info(this.getLogMessage(
+                    "Popped buffer from free buffer collection with size %d. %d Buffers in the pool",
+                    pageSize.getNumberOfBytes(),
+                    freeBuffers.size()
+            ));
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
         if (freeBuffer == null) {
             throw new BufferPoolException("No free buffers available");
         }
         return freeBuffer;
     }
-
 
     @Override
     public void startIOThreads() throws BufferPoolException {
@@ -56,6 +84,7 @@ public class PoolManager implements BufferPoolManager {
         this.writeThread.setName("WriteThread");
         this.readThread.start();
         this.writeThread.start();
+        this.logger.info("Started IO threads");
     }
 
     @Override
@@ -77,11 +106,11 @@ public class PoolManager implements BufferPoolManager {
         // bookkeeping work in case we haven't seen a particular page size before
         if (!this.freeBufferCollection.containsKey(resourcePageSize.getNumberOfBytes())) {
             // create new buffer collection for this page size
-            this.freeBufferCollection.put(resourcePageSize.getNumberOfBytes(), new ConcurrentLinkedQueue<>());
+            this.freeBufferCollection.put(resourcePageSize.getNumberOfBytes(), new LinkedBlockingQueue<>());
             // initialize the buffers in the collection
             for (int i = 0; i < this.config.getNumIOBuffers(); i++) {
                 byte[] newByteArray = new byte[resourcePageSize.getNumberOfBytes()];
-                this.freeBufferCollection.get(resourcePageSize.getNumberOfBytes()).add(newByteArray);
+                this.freeBufferCollection.get(resourcePageSize.getNumberOfBytes()).offer(newByteArray);
             }
             // create new page cache with size given by the page size
             PageCache pageCache = new PageCacheClass(resourcePageSize, this.config.getCacheSize(resourcePageSize));
@@ -90,6 +119,7 @@ public class PoolManager implements BufferPoolManager {
         }
         // register the resource manager
         this.resourceManagers.put(id, manager);
+        this.logger.info(this.getLogMessage("Registered resource manager for resource %d", id));
     }
 
     @Override
@@ -107,10 +137,12 @@ public class PoolManager implements BufferPoolManager {
 
         if (data != null) {
             // page is in cache and we do not involve the disk
+            this.logger.info(this.getLogMessage("Returning cache hit for page %d of resource %d", pageNumber, resourceId));
             return data;
         } else {
             // we have a cache miss and need to load the page from disk
             // create a new load queue entry
+            this.logger.info(this.getLogMessage("Cache miss for page %d of resource %d", pageNumber, resourceId));
             LoadQueueEntry entry = new LoadQueueEntry(
                     resourceId,
                     pageNumber,
@@ -118,12 +150,14 @@ public class PoolManager implements BufferPoolManager {
                     pageCache,
                     true
             );
-            this.simpleLoadQueue.offer(entry);
+            boolean offerResult = this.simpleLoadQueue.offer(entry);
+            this.logger.info(this.getLogMessage("Offered load queue entry for page %d of resource %d to load queue with result %s", pageNumber, resourceId, offerResult));
             // wait for the read to complete
             synchronized (entry) {
                 while (!entry.isCompleted()) {
                     try {
                         entry.wait();
+                        this.logger.info(this.getLogMessage("Waiting for load queue entry for page %d of resource %d to complete", pageNumber, resourceId));
                     } catch (InterruptedException e) {
                         logger.log(Level.SEVERE, e.toString());
                     }
@@ -162,7 +196,6 @@ public class PoolManager implements BufferPoolManager {
                     true
             );
             // push the entry to the queue
-            // TODO: group page requests by page id as given in lecture slides
             this.simpleLoadQueue.offer(entry);
             synchronized (entry) {
                 while (!entry.isCompleted()) {
@@ -208,7 +241,7 @@ public class PoolManager implements BufferPoolManager {
                     cache,
                     false
             );
-            // push the entry to the queue
+            // push the entry to the queue asynchronously
             this.simpleLoadQueue.offer(entry);
         }
     }
@@ -237,8 +270,8 @@ public class PoolManager implements BufferPoolManager {
         byte[] buffer = this.getFreeBuffer(pageSize);
         try {
             CacheableData page = manager.reserveNewPage(buffer);
+            logger.info(getLogMessage("Reserved new page %d of resource %d", page.getPageNumber(), resourceId));
             // get the page cache for this page size
-            // TODO: check every read/write requests if it is already in the queue
             try {
                 PageCache pageCache = this.pageCaches.get(pageSize.getNumberOfBytes());
                 EvictedCacheEntry evictedEntry = pageCache.addPageAndPin(page, resourceId);
@@ -250,11 +283,16 @@ public class PoolManager implements BufferPoolManager {
                             evictedEntry.getBinaryPage(),
                             evictedEntry.getWrappingPage()
                     );
-                    simpleWriteQueue.offer(entry);
+                    boolean offerResult = simpleWriteQueue.offer(entry);
+                    logger.info(getLogMessage("Offered entry for page %d of resource %d to write queue with result %s because page has been modified",
+                            evictedEntry.getPageNumber(), evictedEntry.getResourceID(), offerResult));
                 } else {
                     byte[] rawPage = evictedEntry.getBinaryPage();
-                    ConcurrentLinkedQueue<byte[]> bufferQueue = this.freeBufferCollection.get(pageSize.getNumberOfBytes());
-                    bufferQueue.add(rawPage);
+                    LinkedBlockingQueue<byte[]> bufferQueue = this.freeBufferCollection.get(pageSize.getNumberOfBytes());
+                    boolean offerResult = bufferQueue.offer(rawPage);
+                    logger.info(getLogMessage("Offered buffer from evicted entry for page %d of resource %d back to the pool. %d buffers in the pool",
+                        evictedEntry.getPageNumber(), evictedEntry.getResourceID(), bufferQueue.size()));
+
                 }
             } catch (DuplicateCacheEntryException e) {
                 throw new BufferPoolException("Page already in cache");
@@ -280,6 +318,7 @@ public class PoolManager implements BufferPoolManager {
         byte[] buffer = this.getFreeBuffer(pageSize);
         try {
             CacheableData page = manager.reserveNewPage(buffer, type);
+            logger.info("Reserved new page for resource " + resourceId + " with type " + type.toString());
             // get the page cache for this page size
             PageCache pageCache = this.pageCaches.get(pageSize.getNumberOfBytes());
             try {
@@ -306,26 +345,27 @@ public class PoolManager implements BufferPoolManager {
         public void run() {
             while (this.isAlive) {
                 // check if the load queue is not empty
-                    // TODO: how do determine which load queue to poll from?
-                    // => there is a value in the config which describes how big each subqueue can get
-                    // => use n = 10 as the difference factor for page number to choose a subqueue depending on the page number
-                    // start from the most recent page
-                    // TODO: how to retrieve the amount of pages required ? it appears that each entry represents a request for one page
-                    // TODO: always reuse buffers from the request queue entries
+                // => there is a value in the config which describes how big each subqueue can get
+                // => use n = 10 as the difference factor for page number to choose a subqueue depending on the page number
+                // start from the most recent page
                 LoadQueueEntry request = null;
                 try {
                     request = simpleLoadQueue.take();
+                    logger.info(getLogMessage("Took load queue entry for page %d of resource %d", request.getPageNumber(), request.getResourceId()));
                     // check the write queue for the page in the request
                     synchronized (simpleWriteQueue) {
                         for (WriteQueueEntry entry : simpleWriteQueue) {
                             if (entry.getResourceId() == request.getResourceId() && entry.getPageNumber() == request.getPageNumber()) {
                                 // page is in the write queue => we do not need to load it from disk
+                                logger.info(getLogMessage("Page %d of resource %d is in the write queue", request.getPageNumber(), request.getResourceId()));
                                 PageCache cache = request.getTargetCache();
                                 try {
                                     if (request.shouldPin()) {
                                         cache.addPageAndPin(entry.getPage(), entry.getResourceId());
+                                        logger.info("Added page %d of resource %d to cache and pinned it");
                                     } else {
                                         cache.addPage(entry.getPage(), entry.getResourceId());
+                                        logger.info("Added page %d of resource %d to cache");
                                     }
                                 }
                                 catch (DuplicateCacheEntryException e) {
@@ -346,45 +386,50 @@ public class PoolManager implements BufferPoolManager {
                 try {
                     byte[] buffer = getFreeBuffer(pageSize);
                     CacheableData data = resourceManager.readPageFromResource(buffer, request.getPageNumber());
-
+                    logger.info(getLogMessage("Read page %d of resource %d from disk", request.getPageNumber(), resourceId));
                     PageCache pageCache = request.getTargetCache();
                     EvictedCacheEntry evictedEntry;
                     synchronized (pageCache) {
                         if (request.shouldPin()) {
                             evictedEntry = pageCache.addPageAndPin(data, resourceId);
+                            logger.info(getLogMessage("Added page %d of resource %d to cache and pinned it", request.getPageNumber(), resourceId));
                         } else {
                             evictedEntry = pageCache.addPage(data, resourceId);
+                            logger.info(getLogMessage("Added page %d of resource %d to cache", request.getPageNumber(), resourceId));
                         }
                     }
                     if (evictedEntry.getResourceID() != -1 && evictedEntry.getWrappingPage().hasBeenModified()) {
                         // add evicted page to the write queue because it has been modified and cache is hot
-                        simpleWriteQueue.offer(new WriteQueueEntry(
+                        boolean offerResult = simpleWriteQueue.offer(new WriteQueueEntry(
                                 evictedEntry.getResourceID(),
                                 evictedEntry.getPageNumber(),
                                 resourceManager,
                                 evictedEntry.getBinaryPage(),
                                 evictedEntry.getWrappingPage()
                         ));
+                        logger.info(getLogMessage("Offered write queue entry for page %d of resource %d to write queue with result %s",
+                                evictedEntry.getPageNumber(), evictedEntry.getResourceID(), offerResult));
                     } else {
-                        ConcurrentLinkedQueue<byte[]> bufferQueue = freeBufferCollection.get(pageSize.getNumberOfBytes());
+                        LinkedBlockingQueue<byte[]> bufferQueue = freeBufferCollection.get(pageSize.getNumberOfBytes());
                         byte[] rawPage = evictedEntry.getBinaryPage();
-                        bufferQueue.add(rawPage);
-                        System.out.println("Added buffer back to the pool");
+                        bufferQueue.offer(rawPage);
+                        logger.info(getLogMessage("Added buffer back to the pool. %d buffers in the pool", bufferQueue.size()));
                     }
                     synchronized (request) {
                         request.setResultPage(data);
                         request.setCompleted();
                         request.notifyAll();
+                        logger.info(getLogMessage("Notifying execution threads that request for page %d of resource %d is completed", request.getResourceId(), request.getPageNumber()));
                     }
-                    } catch (BufferPoolException e) {
-                        logger.log(Level.SEVERE, e.toString());
-                    } catch (IOException e) {
-                        logger.log(Level.SEVERE, e.toString());
-                    } catch (DuplicateCacheEntryException e) {
-                        logger.log(Level.SEVERE, e.toString());
-                    } catch (CachePinnedException e) {
-                        logger.log(Level.SEVERE, e.toString());
-                    }
+                } catch (BufferPoolException e) {
+                    logger.log(Level.SEVERE, e.toString());
+                } catch (IOException e) {
+                    logger.severe(getLogMessage("Could not read page %d of resource %d from disk", request.getPageNumber(), resourceId));
+                } catch (DuplicateCacheEntryException e) {
+                    logger.severe(getLogMessage("Could not add page %d of resource %d to cache because it is already in the cache", request.getPageNumber(), resourceId));
+                } catch (CachePinnedException e) {
+                    logger.severe(getLogMessage("Could not add page %d of resource %d to cache because all entries are pinned", request.getPageNumber(), resourceId));
+                }
             }
         }
     }
@@ -401,15 +446,18 @@ public class PoolManager implements BufferPoolManager {
                 WriteQueueEntry entry;
                 try {
                     entry = simpleWriteQueue.take();
+                    logger.info(getLogMessage("Took write queue entry for page %d of resource %d", entry.getPageNumber(), entry.getResourceId()));
                     ResourceManager resourceManager = entry.getResourceManager();
                     PageSize pageSize = resourceManager.getPageSize();
                     try {
                         resourceManager.writePageToResource(entry.getBufferToWrite(), entry.getPage());
+                        logger.info(getLogMessage("Wrote page %d of resource %d to disk", entry.getPageNumber(), entry.getResourceId()));
                         // return the buffer to the free buffer collection
-                        ConcurrentLinkedQueue<byte[]> bufferQueue = freeBufferCollection.get(pageSize.getNumberOfBytes());
-                        bufferQueue.add(entry.getBufferToWrite());
+                        LinkedBlockingQueue<byte[]> bufferQueue = freeBufferCollection.get(pageSize.getNumberOfBytes());
+                        bufferQueue.offer(entry.getBufferToWrite());
+                        logger.info(getLogMessage("Added buffer back to the pool. %d buffers in the pool", bufferQueue.size()));
                     } catch (IOException e) {
-                        logger.log(Level.SEVERE, e.toString());
+                        logger.severe(getLogMessage("Could not write page %d of resource %d to disk: %s", entry.getPageNumber(), entry.getResourceId(), e.getMessage()));
                     }
                 } catch (InterruptedException e) {
                     return;
