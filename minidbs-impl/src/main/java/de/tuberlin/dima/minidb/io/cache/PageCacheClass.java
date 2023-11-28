@@ -89,7 +89,7 @@ public class PageCacheClass implements PageCache {
 
     private boolean checkTList(ArrayList<CacheData> Tlist, int resourceId, int pageNum) {
         for (CacheData cd : Tlist) {
-            if (cd.getResourceId() == resourceId && cd.getPage().getPageNumber() == pageNum) {
+            if (cd.getResourceId() == resourceId && cd.getPage().getPageNumber() == pageNum && !cd.getEviction()) {
                 return true;
             }
         }

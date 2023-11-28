@@ -2,6 +2,7 @@ package de.tuberlin.dima.minidb.io.manager;
 import de.tuberlin.dima.minidb.Config;
 import de.tuberlin.dima.minidb.io.cache.*;
 
+import javax.annotation.processing.SupportedSourceVersion;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -53,6 +54,7 @@ public class PoolManager implements BufferPoolManager {
         // required for throwing exceptions after the closing method has been called
         this.isClosed = false;
         this.logger  = Logger.getLogger("BufferPoolManager");
+//        this.logger .setLevel(Level.OFF);
         logger.info(getLogMessage("Created buffer pool manager with %d IO buffers", config.getNumIOBuffers()));
     }
 
@@ -77,9 +79,6 @@ public class PoolManager implements BufferPoolManager {
             throw new RuntimeException(e);
         }
 
-        if (freeBuffer == null) {
-            throw new BufferPoolException("No free buffers available");
-        }
         return freeBuffer;
     }
 
@@ -135,45 +134,59 @@ public class PoolManager implements BufferPoolManager {
         if (this.isClosed) {
             throw new BufferPoolException("The pool is closed");
         }
+        LoadQueueEntry entry = null;
+        synchronized (simpleLoadQueue){
         // fetch the resource manager
         ResourceManager resourceManager = this.resourceManagers.get(resourceId);
         // fetch the page size of the resource manager
         PageSize pageSize = resourceManager.getPageSize();
         // fetch the page cache for this page size
         PageCache pageCache = this.pageCaches.get(pageSize.getNumberOfBytes());
-        cacheLock.writeLock().lock();
-        CacheableData data = pageCache.getPageAndPin(resourceId, pageNumber);
-        cacheLock.writeLock().unlock();
+        CacheableData data = null;
+        synchronized (pageCache){
+             data = pageCache.getPageAndPin(resourceId, pageNumber);
+        }
+
         if (data != null) {
             // page is in cache and we do not involve the disk
             this.logger.info(this.getLogMessage("Returning cache hit for page %d of resource %d", pageNumber, resourceId));
             return data;
         } else {
-            // we have a cache miss and need to load the page from disk
-            // create a new load queue entry
-            this.logger.info(this.getLogMessage("Cache miss for page %d of resource %d", pageNumber, resourceId));
-            // check if the entry is already in the load queue
-            LoadQueueEntry entry = null;
-            synchronized (simpleLoadQueue) {
-                for (LoadQueueEntry queueEntry: simpleLoadQueue) {
-                    if (queueEntry.getResourceId() == resourceId && queueEntry.getPageNumber() == pageNumber) {
-                        entry = queueEntry;
-                        this.logger.info(this.getLogMessage("Found existing load queue entry for page %d of resource %d", pageNumber, resourceId));
-                        break;
+                // we have a cache miss and need to load the page from disk
+                // create a new load queue entry
+                this.logger.info(this.getLogMessage("Cache miss for page %d of resource %d", pageNumber, resourceId));
+                // check if the entry is already in the load queue
+
+
+
+                    for (LoadQueueEntry queueEntry: simpleLoadQueue) {
+                        if (queueEntry.getResourceId() == resourceId && queueEntry.getPageNumber() == pageNumber) {
+                            entry = queueEntry;
+                            this.logger.info(this.getLogMessage("Found existing load queue entry for page %d of resource %d", pageNumber, resourceId));
+                            break;
+                        }
                     }
+
+                    if (entry == null) {
+                        entry = new LoadQueueEntry(
+                                resourceId,
+                                pageNumber,
+                                resourceManager,
+                                pageCache,
+                                true
+                        );
+
+                        boolean offerResult = this.simpleLoadQueue.offer(entry);
+                        if(simpleLoadQueue.size() == 1){
+                            simpleLoadQueue.notifyAll();
+                        }
+                        this.logger.info(this.getLogMessage("Offered load queue entry for page %d of resource %d to load queue with result %s", pageNumber, resourceId, offerResult));
                 }
+
+
+
             }
-            if (entry == null) {
-                entry = new LoadQueueEntry(
-                        resourceId,
-                        pageNumber,
-                        resourceManager,
-                        pageCache,
-                        true
-                );
-                boolean offerResult = this.simpleLoadQueue.offer(entry);
-                this.logger.info(this.getLogMessage("Offered load queue entry for page %d of resource %d to load queue with result %s", pageNumber, resourceId, offerResult));
-            }
+        }
             synchronized (entry) {
                 while (!entry.isCompleted()) {
                     try {
@@ -187,14 +200,16 @@ public class PoolManager implements BufferPoolManager {
                 logger.info(getLogMessage("Got notified that entry for page %d of resource %d is complete", pageNumber, resourceId));
                 return entry.getResultPage();
             }
-        }
+
     }
 
     @Override
-    public CacheableData unpinAndGetPageAndPin(int resourceId, int unpinPageNumber, int getPageNumber) throws BufferPoolException, IOException {
+    public CacheableData unpinAndGetPageAndPin(int resourceId, int unpinPageNumber, int getPageNumber) throws BufferPoolException {
         if (this.isClosed) {
             throw new BufferPoolException("The pool is closed");
         }
+        LoadQueueEntry entry = null;
+        synchronized (simpleLoadQueue){
         // unpin the given page
         this.unpinPage(resourceId, unpinPageNumber);
         // fetch the resource manager
@@ -204,36 +219,67 @@ public class PoolManager implements BufferPoolManager {
         // fetch the page cache for this page size
         PageCache pageCache = this.pageCaches.get(pageSize.getNumberOfBytes());
         // check if the page is in the cache
-        cacheLock.writeLock().lock();
-        CacheableData data = pageCache.getPageAndPin(resourceId, getPageNumber);
-        cacheLock.writeLock().unlock();
+        CacheableData data = null;
+        synchronized (pageCache){
+            data = pageCache.getPageAndPin(resourceId, getPageNumber);
+        }
         if (data != null) {
             // page is in cache and we do not involve the disk
             return data;
         } else {
             // we have a cache miss and need to load the page from disk
             // create a new load queue entry
-            LoadQueueEntry entry = new LoadQueueEntry(
-                    resourceId,
-                    getPageNumber,
-                    resourceManager,
-                    pageCache,
-                    true
-            );
-            // push the entry to the queue
-            this.simpleLoadQueue.offer(entry);
+            this.logger.info(this.getLogMessage("Cache miss for page %d of resource %d", getPageNumber, resourceId));
+            // check if the entry is already in the load queue
+
+
+
+                for (LoadQueueEntry queueEntry: simpleLoadQueue) {
+                    if (queueEntry.getResourceId() == resourceId && queueEntry.getPageNumber() == getPageNumber) {
+                        entry = queueEntry;
+                        entry.increasePinning();
+                        this.logger.info(this.getLogMessage("Found existing load queue entry for page %d of resource %d", getPageNumber, resourceId));
+                        break;
+                    }
+                }
+
+                if (entry == null) {
+                    entry = new LoadQueueEntry(
+                            resourceId,
+                            getPageNumber,
+                            resourceManager,
+                            pageCache,
+                            true
+                    );
+                    entry.increasePinning();
+
+                    boolean offerResult = this.simpleLoadQueue.offer(entry);
+                    if(simpleLoadQueue.size() == 1){
+                        simpleLoadQueue.notifyAll();
+                    }
+                    this.logger.info(this.getLogMessage("Offered load queue entry for page %d of resource %d to load queue with result %s", getPageNumber, resourceId, offerResult));
+
+
+
+            }
+
+
+            }
+        }
             synchronized (entry) {
                 while (!entry.isCompleted()) {
                     try {
+                        this.logger.info(this.getLogMessage("Waiting for load queue entry for page %d of resource %d to complete", getPageNumber, resourceId));
                         entry.wait();
                     } catch (InterruptedException e) {
                         logger.log(Level.SEVERE, e.toString());
+                        break;
                     }
                 }
                 logger.info(getLogMessage("Got notified that entry for page %d of resource %d is complete", getPageNumber, resourceId));
+                return entry.getResultPage();
             }
-            return entry.getResultPage();
-        }
+
     }
 
 
@@ -245,9 +291,10 @@ public class PoolManager implements BufferPoolManager {
         PageSize pageSize = manager.getPageSize();
         // get the page cache
         PageCache pageCache = this.pageCaches.get(pageSize.getNumberOfBytes());
-        cacheLock.writeLock().lock();
-        pageCache.unpinPage(resourceId, pageNumber);
-        cacheLock.writeLock().unlock();
+        synchronized (pageCache){
+            pageCache.unpinPage(resourceId, pageNumber);
+        }
+
     }
 
     @Override
@@ -255,23 +302,53 @@ public class PoolManager implements BufferPoolManager {
         if (this.isClosed) {
             throw new BufferPoolException("The pool is closed");
         }
-        ResourceManager manager = this.resourceManagers.get(resourceId);
-        PageSize pageSize = manager.getPageSize() ;
-        PageCache cache = this.pageCaches.get(pageSize.getNumberOfBytes());
-        cacheLock.readLock().lock();
-        CacheableData cacheData = cache.getPage(resourceId, pageNumber);
-        cacheLock.readLock().unlock();
+        synchronized (simpleLoadQueue){
+        ResourceManager resourceManager = this.resourceManagers.get(resourceId);
+        PageSize pageSize = resourceManager.getPageSize() ;
+        PageCache pageCache = this.pageCaches.get(pageSize.getNumberOfBytes());
+        CacheableData cacheData = null;
+        synchronized (pageCache){
+            cacheData = pageCache.getPage(resourceId, pageNumber);
+        }
+
         if (cacheData == null) {
+            // we have a cache miss and need to load the page from disk
             // create a new load queue entry
-            LoadQueueEntry entry = new LoadQueueEntry(
-                    resourceId,
-                    pageNumber,
-                    manager,
-                    cache,
-                    false
-            );
-            // push the entry to the queue asynchronously
-            this.simpleLoadQueue.offer(entry);
+            this.logger.info(this.getLogMessage("Cache miss for page %d of resource %d", pageNumber, resourceId));
+            // check if the entry is already in the load queue
+            LoadQueueEntry entry = null;
+
+
+                for (LoadQueueEntry queueEntry: simpleLoadQueue) {
+                    if (queueEntry.getResourceId() == resourceId && queueEntry.getPageNumber() == pageNumber) {
+                        entry = queueEntry;
+                        this.logger.info(this.getLogMessage("Found existing load queue entry for page %d of resource %d", pageNumber, resourceId));
+                        break;
+                    }
+
+
+                }
+
+                if (entry == null) {
+                    entry = new LoadQueueEntry(
+                            resourceId,
+                            pageNumber,
+                            resourceManager,
+                            pageCache,
+                            true
+                    );
+                    boolean offerResult = this.simpleLoadQueue.offer(entry);
+                    if(simpleLoadQueue.size() == 1){
+                        simpleLoadQueue.notifyAll();
+                    }
+                    this.logger.info(this.getLogMessage("Offered load queue entry for page %d of resource %d to load queue with result %s", pageNumber, resourceId, offerResult));
+                }
+            }
+
+
+
+
+
         }
     }
 
@@ -280,6 +357,11 @@ public class PoolManager implements BufferPoolManager {
         if (this.isClosed) {
             throw new BufferPoolException("The pool is closed");
         }
+
+        for(int pageNumber = startPageNumber; pageNumber <= endPageNumber; pageNumber ++){
+            this.prefetchPage(resourceId, pageNumber);
+        }
+
     }
 
 
@@ -303,15 +385,17 @@ public class PoolManager implements BufferPoolManager {
             // get the page cache for this page size
             try {
                 PageCache pageCache = this.pageCaches.get(pageSize.getNumberOfBytes());
-                cacheLock.writeLock().lock();
-                EvictedCacheEntry evictedEntry = pageCache.addPageAndPin(page, resourceId);
-                logger.info(getLogMessage("Got evicted entry for page %d of resource %d", evictedEntry.getPageNumber(), evictedEntry.getResourceID()));
-                cacheLock.writeLock().unlock();
+                EvictedCacheEntry evictedEntry = null;
+                synchronized (pageCache) {
+                    evictedEntry = pageCache.addPageAndPin(page, resourceId);
+                    logger.info(getLogMessage("Got evicted entry for page %d of resource %d", evictedEntry.getPageNumber(), evictedEntry.getResourceID()));
+                }
                 if (evictedEntry.getWrappingPage() != null && evictedEntry.getWrappingPage().hasBeenModified()) {
                     WriteQueueEntry entry = new WriteQueueEntry(
                             evictedEntry.getResourceID(),
                             evictedEntry.getPageNumber(),
-                            manager,
+//                            heereee
+                            this.resourceManagers.get(evictedEntry.getResourceID()),
                             evictedEntry.getBinaryPage(),
                             evictedEntry.getWrappingPage()
                     );
@@ -339,24 +423,48 @@ public class PoolManager implements BufferPoolManager {
 
     @Override
     public CacheableData createNewPageAndPin(int resourceId, Enum<?> type) throws BufferPoolException, IOException {
+
         if (this.isClosed) {
             throw new BufferPoolException("The pool is closed");
         }
         // get the manager for the provided id
         ResourceManager manager = this.resourceManagers.get(resourceId);
+        if (manager == null) {
+            throw new BufferPoolException("Manager has not been registered yet");
+        }
         // get the managers page size
         PageSize pageSize = manager.getPageSize();
         // get a free buffer for the managers page size
         byte[] buffer = this.getFreeBuffer(pageSize);
         try {
             CacheableData page = manager.reserveNewPage(buffer, type);
-            logger.info("Reserved new page for resource " + resourceId + " with type " + type.toString());
+            logger.info(getLogMessage("Reserved new page %d of resource %d", page.getPageNumber(), resourceId));
             // get the page cache for this page size
-            PageCache pageCache = this.pageCaches.get(pageSize.getNumberOfBytes());
             try {
-                cacheLock.writeLock().lock();
-                pageCache.addPageAndPin(page, resourceId);
-                cacheLock.writeLock().unlock();
+                PageCache pageCache = this.pageCaches.get(pageSize.getNumberOfBytes());
+                EvictedCacheEntry evictedEntry = null;
+                synchronized (pageCache) {
+                    evictedEntry = pageCache.addPageAndPin(page, resourceId);
+                    logger.info(getLogMessage("Got evicted entry for page %d of resource %d", evictedEntry.getPageNumber(), evictedEntry.getResourceID()));
+                }
+                if (evictedEntry.getWrappingPage() != null && evictedEntry.getWrappingPage().hasBeenModified()) {
+                    WriteQueueEntry entry = new WriteQueueEntry(
+                            evictedEntry.getResourceID(),
+                            evictedEntry.getPageNumber(),
+                            this.resourceManagers.get(evictedEntry.getResourceID()),
+                            evictedEntry.getBinaryPage(),
+                            evictedEntry.getWrappingPage()
+                    );
+                    boolean offerResult = simpleWriteQueue.offer(entry);
+                    logger.info(getLogMessage("Offered entry for page %d of resource %d to write queue with result %s because page has been modified",
+                            evictedEntry.getPageNumber(), evictedEntry.getResourceID(), offerResult));
+                } else {
+                    byte[] rawPage = evictedEntry.getBinaryPage();
+                    LinkedBlockingQueue<byte[]> bufferQueue = this.freeBufferCollection.get(pageSize.getNumberOfBytes());
+                    boolean offerResult = bufferQueue.offer(rawPage);
+                    logger.info(getLogMessage("Offered buffer from evicted entry for page %d of resource %d back to the pool. %d buffers in the pool",
+                            evictedEntry.getPageNumber(), evictedEntry.getResourceID(), bufferQueue.size()));
+                }
             } catch (DuplicateCacheEntryException e) {
                 throw new BufferPoolException("Page already in cache");
             } catch (CachePinnedException e) {
@@ -367,7 +475,6 @@ public class PoolManager implements BufferPoolManager {
             throw new BufferPoolException("Manager could not reserve new page");
         }
     }
-
     private class ReadThread extends Thread {
         private volatile boolean isAlive = true;
 
@@ -382,94 +489,140 @@ public class PoolManager implements BufferPoolManager {
                 // => there is a value in the config which describes how big each subqueue can get
                 // => use n = 10 as the difference factor for page number to choose a subqueue depending on the page number
                 // start from the most recent page
+
                 LoadQueueEntry request = null;
-                try {
-                    request = simpleLoadQueue.take();
-                    logger.info(getLogMessage("Took load queue entry for page %d of resource %d", request.getPageNumber(), request.getResourceId()));
-                    // check the write queue for the page in the request
-                    synchronized (simpleWriteQueue) {
+                int resourceId = -1;
+                ResourceManager resourceManager = null;
+                CacheableData requestedData = null;
+
+                synchronized (simpleLoadQueue){
+                    while(simpleLoadQueue.peek() == null)
+                    {
+                            try {
+                                simpleLoadQueue.wait();
+                            } catch (InterruptedException e) {
+                                this.isAlive = false;
+                                break;
+                            }
+
+                    }
+                    request = simpleLoadQueue.peek();
+                }
+                if(!this.isAlive){
+                    break;
+                }
+
+
+
+
+//                deadlock because eec thread thinks it is getting the required resource but it was already in cache
+
+                resourceId = request.getResourceId();
+                resourceManager = request.getResourceManager();
+                logger.info(getLogMessage("Took load queue entry for page %d of resource %d", request.getPageNumber(), request.getResourceId()));
+                // check the write queue for the page in the request
+                synchronized (simpleWriteQueue) {
                         for (WriteQueueEntry entry : simpleWriteQueue) {
                             if (entry.getResourceId() == request.getResourceId() && entry.getPageNumber() == request.getPageNumber()) {
                                 // page is in the write queue => we do not need to load it from disk
                                 logger.info(getLogMessage("Page %d of resource %d is in the write queue", request.getPageNumber(), request.getResourceId()));
-                                PageCache cache = request.getTargetCache();
-                                    try {
-                                        if (request.shouldPin()) {
-                                            cacheLock.writeLock().lock();
-                                            cache.addPageAndPin(entry.getPage(), entry.getResourceId());
-                                            cacheLock.writeLock().unlock();
-                                            logger.info("Added page %d of resource %d to cache and pinned it");
-                                        } else {
-                                            cacheLock.writeLock().lock();
-                                            cache.addPage(entry.getPage(), entry.getResourceId());
-                                            cacheLock.writeLock().unlock();
-                                            logger.info("Added page %d of resource %d to cache");
-                                        }
-                                    }
-                                    catch (DuplicateCacheEntryException e) {
-                                        throw new RuntimeException(e);
-                                    } catch (CachePinnedException e) {
-                                        throw new RuntimeException(e);
+                                PageCache pagecache = request.getTargetCache();
+                                requestedData = entry.getPage();
+                                if(request.shouldPin()){
+                                    for(int i =0; i < request.getPinning(); i ++){
+                                        entry.markForImmediateRefetch(request.shouldPin());
                                     }
                                 }
+                                else{
+                                    entry.markForImmediateRefetch(false);
+                                }
+
                             }
                         }
-                } catch (InterruptedException e) {
-                    this.isAlive = false;
-                    return;
-                }
-                int resourceId = request.getResourceId();
-                ResourceManager resourceManager = request.getResourceManager();
-                PageSize pageSize = resourceManager.getPageSize();
+                    }
+
                 try {
-                    byte[] buffer = getFreeBuffer(pageSize);
-                    CacheableData data = resourceManager.readPageFromResource(buffer, request.getPageNumber());
+
+                    if( requestedData == null) {
+                        byte[] buffer;
+                        buffer = getFreeBuffer(resourceManager.getPageSize());
+                        requestedData = resourceManager.readPageFromResource(buffer, request.getPageNumber());
+
+                    }
                     logger.info(getLogMessage("Read page %d of resource %d from disk", request.getPageNumber(), resourceId));
+
                     PageCache pageCache = request.getTargetCache();
                     EvictedCacheEntry evictedEntry;
                     if (request.shouldPin()) {
-                        cacheLock.writeLock().lock();
-                        evictedEntry = pageCache.addPageAndPin(data, resourceId);
-                        logger.info(getLogMessage("Got evicted entry for page %d of resource %d", evictedEntry.getPageNumber(), evictedEntry.getResourceID()));
-                        logger.info(getLogMessage("Added page %d of resource %d to cache and pinned it", request.getPageNumber(), resourceId));
-                        cacheLock.writeLock().lock();
+                        synchronized (pageCache){
+
+
+
+
+                            evictedEntry = pageCache.addPageAndPin(requestedData, resourceId);
+                            for(int i = 0; i < request.getPinning() -1 ; i++){
+                                pageCache.getPageAndPin(resourceId, requestedData.getPageNumber());
+                            }
+                            logger.info(getLogMessage("Got evicted entry for page %d of resource %d", evictedEntry.getPageNumber(), evictedEntry.getResourceID()));
+                            logger.info(getLogMessage("Added page %d of resource %d to cache and pinned it", request.getPageNumber(), resourceId));
+                        }
+
                     } else {
-                        cacheLock.writeLock().lock();
-                        evictedEntry = pageCache.addPage(data, resourceId);
-                        logger.info(getLogMessage("Got evicted entry for page %d of resource %d", evictedEntry.getPageNumber(), evictedEntry.getResourceID()));
-                        logger.info(getLogMessage("Added page %d of resource %d to cache", request.getPageNumber(), resourceId));
-                        cacheLock.writeLock().lock();
+                        synchronized (pageCache)
+                        {
+                            evictedEntry = pageCache.addPage(requestedData, resourceId);
+                            logger.info(getLogMessage("Got evicted entry for page %d of resource %d", evictedEntry.getPageNumber(), evictedEntry.getResourceID()));
+                            logger.info(getLogMessage("Added page %d of resource %d to cache", request.getPageNumber(), resourceId));
+                        }
+
                     }
                     if (evictedEntry.getResourceID() != -1 && evictedEntry.getWrappingPage().hasBeenModified()) {
                         // add evicted page to the write queue because it has been modified and cache is hot
                         boolean offerResult = simpleWriteQueue.offer(new WriteQueueEntry(
                                 evictedEntry.getResourceID(),
                                 evictedEntry.getPageNumber(),
-                                resourceManager,
+                                resourceManagers.get(evictedEntry.getResourceID()),
                                 evictedEntry.getBinaryPage(),
                                 evictedEntry.getWrappingPage()
                         ));
+
                         logger.info(getLogMessage("Offered write queue entry for page %d of resource %d to write queue with result %s",
                                 evictedEntry.getPageNumber(), evictedEntry.getResourceID(), offerResult));
                     } else {
-                        LinkedBlockingQueue<byte[]> bufferQueue = freeBufferCollection.get(pageSize.getNumberOfBytes());
+                        LinkedBlockingQueue<byte[]> bufferQueue = freeBufferCollection.get(resourceManager.getPageSize().getNumberOfBytes());
                         byte[] rawPage = evictedEntry.getBinaryPage();
                         bufferQueue.offer(rawPage);
                         logger.info(getLogMessage("Added buffer back to the pool. %d buffers in the pool", bufferQueue.size()));
                     }
+
+                    synchronized (simpleLoadQueue) {
+                        LoadQueueEntry e = simpleLoadQueue.poll();
+                    }
+
                     synchronized (request) {
-                        request.setResultPage(data);
+                        request.setResultPage(requestedData);
                         request.setCompleted();
                         request.notifyAll();
                         logger.info(getLogMessage("Notifying execution threads that request for page %d of resource %d is completed", request.getResourceId(), request.getPageNumber()));
                     }
-                } catch (BufferPoolException e) {
-                    logger.log(Level.SEVERE, e.toString());
+
+
+//                    lock cache as well in the queue sync check
+
+                }
+                catch (BufferPoolException e) {
+                    throw new RuntimeException(e);
                 } catch (IOException e) {
                     logger.severe(getLogMessage("Could not read page %d of resource %d from disk", request.getPageNumber(), resourceId));
                 } catch (DuplicateCacheEntryException e) {
+                    synchronized (simpleLoadQueue) {
+                        simpleLoadQueue.poll();
+                    }
                     logger.severe(getLogMessage("Could not add page %d of resource %d to cache because it is already in the cache", request.getPageNumber(), resourceId));
                 } catch (CachePinnedException e) {
+                    synchronized (simpleLoadQueue) {
+                        simpleLoadQueue.poll();
+                    }
                     logger.severe(getLogMessage("Could not add page %d of resource %d to cache because all entries are pinned", request.getPageNumber(), resourceId));
                 }
             }
@@ -492,14 +645,19 @@ public class PoolManager implements BufferPoolManager {
                     ResourceManager resourceManager = entry.getResourceManager();
                     PageSize pageSize = resourceManager.getPageSize();
                     try {
+                        
                         resourceManager.writePageToResource(entry.getBufferToWrite(), entry.getPage());
                         logger.info(getLogMessage("Wrote page %d of resource %d to disk", entry.getPageNumber(), entry.getResourceId()));
                     } catch (IOException e) {
                         logger.severe(getLogMessage("Could not write page %d of resource %d to disk: %s", entry.getPageNumber(), entry.getResourceId(), e.getMessage()));
                     }
-                    LinkedBlockingQueue<byte[]> bufferQueue = freeBufferCollection.get(pageSize.getNumberOfBytes());
-                    bufferQueue.offer(entry.getBufferToWrite());
-                    logger.info(getLogMessage("Added buffer back to the pool. %d buffers in the pool", bufferQueue.size()));
+
+                    if(!entry.isSetForImmediateRefetch()){
+                        LinkedBlockingQueue<byte[]> bufferQueue = freeBufferCollection.get(pageSize.getNumberOfBytes());
+                        bufferQueue.offer(entry.getBufferToWrite());
+                        logger.info(getLogMessage("Added buffer back to the pool. %d buffers in the pool", bufferQueue.size()));
+                    }
+
                 } catch (InterruptedException e) {
                     this.isAlive = false;
                 }
