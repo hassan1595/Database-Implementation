@@ -645,7 +645,8 @@ public class PoolManager implements BufferPoolManager {
                     ResourceManager resourceManager = entry.getResourceManager();
                     PageSize pageSize = resourceManager.getPageSize();
                     try {
-                        
+
+
                         resourceManager.writePageToResource(entry.getBufferToWrite(), entry.getPage());
                         logger.info(getLogMessage("Wrote page %d of resource %d to disk", entry.getPageNumber(), entry.getResourceId()));
                     } catch (IOException e) {
