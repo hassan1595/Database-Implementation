@@ -77,7 +77,7 @@ public class ExtensionFactory extends AbstractExtensionFactory {
 
 	@Override
 	public IndexScanOperator createIndexScanOperator(BTreeIndex index, DataField startKey, DataField stopKey, boolean startKeyIncluded, boolean stopKeyIncluded) {
-		throw new UnsupportedOperationException("Method not yet supported");
+		return new IndexScanOperatorClass( index,  startKey,  stopKey,  startKeyIncluded,  stopKeyIncluded);
 	}
 
 	@Override

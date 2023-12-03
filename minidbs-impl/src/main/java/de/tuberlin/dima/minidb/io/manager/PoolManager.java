@@ -90,20 +90,20 @@ public class PoolManager implements BufferPoolManager {
     @Override
     public void closeBufferPool() {
         // we can shut down the read thread immediately and discard any read requests
-        this.isClosed = true;
+
         this.readThread.shutdown();
-        synchronized (resourceManagers)
+        synchronized (simpleWriteQueue)
         {
-            while(!this.writingCompleted)
+            this.writeThread.shutdown();
+            while(!this.writingCompleted )
             {
-                this.writeThread.shutdown();
                 try {
-                    resourceManagers.wait();
+                    simpleWriteQueue.wait();
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
             }
-
+            this.isClosed = true;
         }
 
     }
@@ -634,8 +634,7 @@ public class PoolManager implements BufferPoolManager {
                     this.isAlive = false;
 
                     logger.info(getLogMessage("Bufferpoolmanager closed, writing all pages in caches to disk"));
-                    synchronized (resourceManagers) {
-
+                    synchronized (simpleWriteQueue) {
                         for (Map.Entry<Integer, ResourceManager> hashentry : resourceManagers.entrySet()) {
                             int resourceid = hashentry.getKey();
                             ResourceManager rm = hashentry.getValue();
@@ -646,19 +645,25 @@ public class PoolManager implements BufferPoolManager {
                                         rm.writePageToResource(cd.getBuffer(), cd);
                                         logger.info(getLogMessage("Wrote page %d of resource %d to disk", cd.getPageNumber(), resourceid));
                                     } catch (IOException ex) {
-                                        System.out.println(ex);
                                         continue;
                                     }
                                 }
                             }
                         }
-                        writingCompleted = true;
-                        resourceManagers.notifyAll();
+
+
+
+
                     }
 
 
 
                 }
+            }
+            synchronized (simpleWriteQueue)
+            {
+                simpleWriteQueue.notifyAll();
+                writingCompleted = true;
             }
         }
     }
