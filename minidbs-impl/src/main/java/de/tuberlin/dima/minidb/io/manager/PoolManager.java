@@ -1,12 +1,15 @@
 package de.tuberlin.dima.minidb.io.manager;
 
 import de.tuberlin.dima.minidb.Config;
+import de.tuberlin.dima.minidb.api.AbstractExtensionFactory;
 import de.tuberlin.dima.minidb.io.cache.*;
+import de.tuberlin.dima.minidb.io.tables.TablePage;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
@@ -24,6 +27,7 @@ public class PoolManager implements BufferPoolManager {
     private ReadThread readThread;
     private WriteThread writeThread;
     private boolean isClosed;
+    private  boolean writingCompleted;
 
 
     public PoolManager(Config config, Logger logger) {
@@ -32,13 +36,16 @@ public class PoolManager implements BufferPoolManager {
         this.freeBufferCollection = new ConcurrentHashMap<>();
         this.simpleLoadQueue = new LinkedBlockingQueue<>();
         this.simpleWriteQueue = new LinkedBlockingQueue<>();
+        this.writingCompleted = false;
 
         this.config = config;
         // required for throwing exceptions after the closing method has been called
         this.isClosed = false;
         this.logger = Logger.getLogger("BufferPoolManager");
         logger.info(getLogMessage("Created buffer pool manager with %d IO buffers", config.getNumIOBuffers()));
+        this.logger.setLevel(Level.OFF);
     }
+
 
     private String getLogMessage(String message, Object... args) {
         String formatted = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS"));
@@ -85,8 +92,20 @@ public class PoolManager implements BufferPoolManager {
         // we can shut down the read thread immediately and discard any read requests
         this.isClosed = true;
         this.readThread.shutdown();
-        this.writeThread.shutdown();
-        this.writeThread.interrupt();
+        synchronized (resourceManagers)
+        {
+            while(!this.writingCompleted)
+            {
+                this.writeThread.shutdown();
+                try {
+                    resourceManagers.wait();
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
+        }
+
     }
 
 
@@ -106,7 +125,7 @@ public class PoolManager implements BufferPoolManager {
                 this.freeBufferCollection.get(resourcePageSize.getNumberOfBytes()).offer(newByteArray);
             }
             // create new page cache with size given by the page size
-            PageCache pageCache = new PageCacheClass(resourcePageSize, this.config.getCacheSize(resourcePageSize));
+            PageCache pageCache =  AbstractExtensionFactory.getExtensionFactory().createPageCache(resourcePageSize, this.config.getCacheSize(resourcePageSize));
             this.pageCaches.put(resourcePageSize.getNumberOfBytes(), pageCache);
         }
         // register the resource manager
@@ -508,9 +527,10 @@ public class PoolManager implements BufferPoolManager {
                         }
                     }
                 }
+                byte[] buffer = null;
+
                 try {
                     if (requestedData == null) {
-                        byte[] buffer;
                         buffer = getFreeBuffer(resourceManager.getPageSize());
                         requestedData = resourceManager.readPageFromResource(buffer, request.getPageNumber());
 
@@ -557,7 +577,15 @@ public class PoolManager implements BufferPoolManager {
                 } catch (BufferPoolException e) {
                     throw new RuntimeException(e);
                 } catch (IOException e) {
+                    LinkedBlockingQueue<byte[]> bufferQueue = freeBufferCollection.get(resourceManager.getPageSize().getNumberOfBytes());
+                    bufferQueue.offer(buffer);
+                    synchronized (request) {
+                        request.setResultPage(null);
+                        request.setCompleted();
+                        request.notifyAll();
+                    }
                     logger.severe(getLogMessage("Could not read page %d of resource %d from disk", request.getPageNumber(), resourceId));
+
                 } catch (DuplicateCacheEntryException e) {
                     synchronized (simpleLoadQueue) {
                         simpleLoadQueue.poll();
@@ -578,7 +606,9 @@ public class PoolManager implements BufferPoolManager {
         private volatile boolean isAlive = true;
 
         public void shutdown() {
+
             this.isAlive = false;
+            this.interrupt();
         }
 
         public void run() {
@@ -602,6 +632,32 @@ public class PoolManager implements BufferPoolManager {
                     }
                 } catch (InterruptedException e) {
                     this.isAlive = false;
+
+                    logger.info(getLogMessage("Bufferpoolmanager closed, writing all pages in caches to disk"));
+                    synchronized (resourceManagers) {
+
+                        for (Map.Entry<Integer, ResourceManager> hashentry : resourceManagers.entrySet()) {
+                            int resourceid = hashentry.getKey();
+                            ResourceManager rm = hashentry.getValue();
+                            PageCache pageCache = pageCaches.get(rm.getPageSize().getNumberOfBytes());
+                            for (CacheableData cd : pageCache.getAllPagesForResource(resourceid)) {
+                                if (cd.hasBeenModified()) {
+                                    try {
+                                        rm.writePageToResource(cd.getBuffer(), cd);
+                                        logger.info(getLogMessage("Wrote page %d of resource %d to disk", cd.getPageNumber(), resourceid));
+                                    } catch (IOException ex) {
+                                        System.out.println(ex);
+                                        continue;
+                                    }
+                                }
+                            }
+                        }
+                        writingCompleted = true;
+                        resourceManagers.notifyAll();
+                    }
+
+
+
                 }
             }
         }

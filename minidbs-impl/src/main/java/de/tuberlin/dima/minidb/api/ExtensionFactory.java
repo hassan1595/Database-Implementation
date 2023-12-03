@@ -71,7 +71,8 @@ public class ExtensionFactory extends AbstractExtensionFactory {
 	@Override
 	public TableScanOperator createTableScanOperator(BufferPoolManager bufferPool, TableResourceManager tableManager, int resourceId,
 			int[] producedColumnIndexes, LowLevelPredicate[] predicate, int prefetchWindowLength) {
-		throw new UnsupportedOperationException("Method not yet supported");
+		return new TableScanOperatorClass(bufferPool, tableManager, resourceId, producedColumnIndexes,
+				predicate, prefetchWindowLength);
 	}
 
 	@Override
