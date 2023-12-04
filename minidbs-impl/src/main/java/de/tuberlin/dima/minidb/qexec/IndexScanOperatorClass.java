@@ -45,8 +45,14 @@ public class IndexScanOperatorClass implements  IndexScanOperator{
 
         try {
             DataField[] df = new DataField[1];
-            df[0] = this.resIndex.next();
-            return new DataTuple(df);
+            if(this.resIndex.hasNext()){
+                df[0] = this.resIndex.next();
+                return new DataTuple(df);
+            } else{
+                return  null;
+            }
+
+
         } catch (IOException | PageFormatException e) {
             throw new QueryExecutionException(e);
         }

@@ -48,11 +48,11 @@ public class TableScanOperatorClass implements TableScanOperator{
 
 
         try {
-            int firstpage = this.tableManager.getFirstDataPageNumber();
-            int lastpage = Math.min(this.tableManager.getFirstDataPageNumber()
+            int firstPage = this.tableManager.getFirstDataPageNumber();
+            int lastPage = Math.min(this.tableManager.getFirstDataPageNumber()
                     + this.prefetchWindowLength, this.tableManager.getLastDataPageNumber());
-            this.bufferPool.prefetchPages(this.resourceId, firstpage,
-                    lastpage);
+            this.bufferPool.prefetchPages(this.resourceId, firstPage,
+                    lastPage);
         } catch (BufferPoolException e) {
             throw new QueryExecutionException(e);
         }
