@@ -60,6 +60,8 @@ public class IndexScanOperatorClass implements  IndexScanOperator{
 
     @Override
     public void close() throws QueryExecutionException {
+        this.startKey = null;
+        this.stopKey = null;
 
     }
 }

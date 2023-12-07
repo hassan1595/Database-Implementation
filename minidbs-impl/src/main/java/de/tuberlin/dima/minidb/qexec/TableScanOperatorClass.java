@@ -146,6 +146,7 @@ public class TableScanOperatorClass implements TableScanOperator{
 
     @Override
     public void close() throws QueryExecutionException {
-
+        this.producedColumnIndexes = null;
+        this.predicate = null;
     }
 }
