@@ -19,6 +19,7 @@ public class IndexScanOperatorClass implements  IndexScanOperator{
     private boolean stopKeyIncluded;
 
     private IndexResultIterator<DataField> resIndex;
+    private boolean opened;
 
     public IndexScanOperatorClass(BTreeIndex index, DataField startKey, DataField stopKey, boolean startKeyIncluded, boolean stopKeyIncluded){
 
@@ -27,6 +28,7 @@ public class IndexScanOperatorClass implements  IndexScanOperator{
         this.stopKey = stopKey;
         this.startKeyIncluded = startKeyIncluded;
         this.stopKeyIncluded = stopKeyIncluded;
+        this.opened = false;
     }
     @Override
     public void open(DataTuple correlatedTuple) throws QueryExecutionException {
@@ -37,11 +39,15 @@ public class IndexScanOperatorClass implements  IndexScanOperator{
         } catch (PageFormatException | IOException e) {
             throw new QueryExecutionException(e);
         }
+        this.opened = true;
     }
 
     @Override
     public DataTuple next() throws QueryExecutionException {
 
+        if(!opened){
+            throw new QueryExecutionException("Operator is not yet opened");
+        }
 
         try {
             if(this.resIndex.hasNext()){
@@ -60,8 +66,10 @@ public class IndexScanOperatorClass implements  IndexScanOperator{
 
     @Override
     public void close() throws QueryExecutionException {
+        this.index = null;
         this.startKey = null;
         this.stopKey = null;
+        this.resIndex = null;
 
     }
 }

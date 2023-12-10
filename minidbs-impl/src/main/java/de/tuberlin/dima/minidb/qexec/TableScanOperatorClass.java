@@ -27,7 +27,7 @@ public class TableScanOperatorClass implements TableScanOperator{
     int prefetchWindowLength;
     int currentPage;
     int currentTuple;
-
+    private boolean opened;
 
     public TableScanOperatorClass(BufferPoolManager bufferPool, TableResourceManager tableManager, int resourceId,
     int[] producedColumnIndexes, LowLevelPredicate[] predicate, int prefetchWindowLength){
@@ -38,15 +38,14 @@ public class TableScanOperatorClass implements TableScanOperator{
         this.producedColumnIndexes = producedColumnIndexes;
         this.predicate = predicate;
         this.prefetchWindowLength = prefetchWindowLength;
-        this.currentPage = this.tableManager.getFirstDataPageNumber();
-        this.currentTuple = 0;
+        this.opened = false;
 
     }
 
     @Override
     public void open(DataTuple correlatedTuple) throws QueryExecutionException {
-
-
+        this.currentPage = this.tableManager.getFirstDataPageNumber();
+        this.currentTuple = 0;
         try {
             int firstPage = this.tableManager.getFirstDataPageNumber();
             int lastPage = Math.min(this.tableManager.getFirstDataPageNumber()
@@ -56,6 +55,7 @@ public class TableScanOperatorClass implements TableScanOperator{
         } catch (BufferPoolException e) {
             throw new QueryExecutionException(e);
         }
+        this.opened = true;
 
     }
 
@@ -87,7 +87,9 @@ public class TableScanOperatorClass implements TableScanOperator{
     public DataTuple next() throws QueryExecutionException {
 
 
-
+        if(!opened){
+            throw new QueryExecutionException("Operator is not yet opened");
+        }
 
 
 
@@ -100,12 +102,21 @@ public class TableScanOperatorClass implements TableScanOperator{
         while(this.currentPage <= lastPageNumber)
             {
                 CacheableData cd = this.bufferPool.getPageAndPin(this.resourceId, currentPage);
-                this.bufferPool.unpinPage(this.resourceId, currentPage);;
                 TablePage tp = AbstractExtensionFactory.getExtensionFactory().createTablePage(this.tableManager.getSchema(), cd.getBuffer());
                 while(this.currentTuple < tp.getNumRecordsOnPage()){
-                    DataTuple dt = tp.getDataTuple(this.predicate, this.currentTuple,
-                            this.constructBiMap(this.producedColumnIndexes),
-                            this.getUniquelength(this.producedColumnIndexes));
+
+                    DataTuple dt;
+                    if(predicate == null){
+                        dt = tp.getDataTuple(this.currentTuple,
+                                this.constructBiMap(this.producedColumnIndexes),
+                                this.getUniquelength(this.producedColumnIndexes));
+                    }
+                    else{
+                        dt = tp.getDataTuple(this.predicate, this.currentTuple,
+                                this.constructBiMap(this.producedColumnIndexes),
+                                this.getUniquelength(this.producedColumnIndexes));
+                    }
+
                     if(dt != null){
 
                         DataField[] orderedFields = new DataField[this.producedColumnIndexes.length];
@@ -132,6 +143,7 @@ public class TableScanOperatorClass implements TableScanOperator{
                     }
                 }
                 this.currentPage++;
+                this.bufferPool.unpinPage(this.resourceId, currentPage);;
                 this.currentTuple = 0;
             }
 

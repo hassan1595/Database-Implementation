@@ -94,38 +94,38 @@ public class ExtensionFactory extends AbstractExtensionFactory {
 	@Override
 	public NestedLoopJoinOperator createNestedLoopJoinOperator(PhysicalPlanOperator outerChild, PhysicalPlanOperator innerChild, JoinPredicate joinPredicate,
 			int[] columnMapOuterTuple, int[] columnMapInnerTuple) {
-		throw new UnsupportedOperationException("Method not yet supported");
+		return new NestedLoopJoinOperatorClass(outerChild, innerChild, joinPredicate, columnMapOuterTuple, columnMapInnerTuple);
 	}
 
 	@Override
 	public IndexLookupOperator getIndexLookupOperator(BTreeIndex index, DataField equalityLiteral) {
-		throw new UnsupportedOperationException("Method not yet supported");
+		return new IndexLookupOperatorClass(index, equalityLiteral);
 	}
 
 	@Override
 	public IndexLookupOperator getIndexScanOperatorForBetweenPredicate(BTreeIndex index, DataField lowerBound, boolean lowerIncluded, DataField upperBound,
 			boolean upperIncluded) {
-		throw new UnsupportedOperationException("Method not yet supported");
+		return new IndexLookupOperatorClass(index, lowerBound, lowerIncluded, upperBound, upperIncluded);
 	}
 
 	@Override
 	public IndexCorrelatedLookupOperator getIndexCorrelatedScanOperator(BTreeIndex index, int correlatedColumnIndex) {
-		throw new UnsupportedOperationException("Method not yet supported");
+		return new IndexCorrelatedLookupOperatorClass(index, correlatedColumnIndex);
 	}
 
 	@Override
 	public FetchOperator createFetchOperator(PhysicalPlanOperator child, BufferPoolManager bufferPool, int tableResourceId, int[] outputColumnMap) {
-		throw new UnsupportedOperationException("Method not yet supported");
+		return  new FetchOperatorClass(child, bufferPool, tableResourceId, outputColumnMap);
 	}
 
 	@Override
 	public FilterOperator createFilterOperator(PhysicalPlanOperator child, LocalPredicate predicate) {
-		throw new UnsupportedOperationException("Method not yet supported");
+		return new FilterOperatorClass(child, predicate);
 	}
 
 	@Override
 	public FilterCorrelatedOperator createCorrelatedFilterOperator(PhysicalPlanOperator child, JoinPredicate correlatedPredicate) {
-		throw new UnsupportedOperationException("Method not yet supported");
+		return new FilterCorrelatedOperatorClass(child, correlatedPredicate);
 	}
 
 	@Override
