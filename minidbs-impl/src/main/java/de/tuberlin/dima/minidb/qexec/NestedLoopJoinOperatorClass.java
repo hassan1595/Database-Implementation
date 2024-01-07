@@ -40,7 +40,7 @@ public class NestedLoopJoinOperatorClass implements  NestedLoopJoinOperator{
 
     }
 
-    private DataTuple projectjoinedTuples( DataTuple outer, DataTuple inner, int[] columnMapOuterTuple, int[] columnMapInnerTuple) throws QueryExecutionException {
+    private DataTuple projectJoinedTuples( DataTuple outer, DataTuple inner, int[] columnMapOuterTuple, int[] columnMapInnerTuple) throws QueryExecutionException {
 
         DataField[] orderedFields = new DataField[columnMapOuterTuple.length];
 
@@ -55,7 +55,7 @@ public class NestedLoopJoinOperatorClass implements  NestedLoopJoinOperator{
             }
             else{
                 if(columnMapInnerTuple[i] == -1){
-                    throw new QueryExecutionException("At each index of olumn Maps only one map has to have -1");
+                    throw new QueryExecutionException("At each index of Column Maps only one map has to have -1");
                 }
                 orderedFields[i] = inner.getField(columnMapInnerTuple[i]);
             }
@@ -76,7 +76,7 @@ public class NestedLoopJoinOperatorClass implements  NestedLoopJoinOperator{
 
                 if(this.joinPredicate == null ||
                         this.joinPredicate.evaluate(this.currentOuterTuple, nextInnerTuple)){
-                    return projectjoinedTuples(this.currentOuterTuple, nextInnerTuple,
+                    return projectJoinedTuples(this.currentOuterTuple, nextInnerTuple,
                             this.columnMapOuterTuple, this.columnMapInnerTuple);
                 }
 

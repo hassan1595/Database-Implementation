@@ -131,19 +131,19 @@ public class ExtensionFactory extends AbstractExtensionFactory {
 	@Override
 	public SortOperator createSortOperator(PhysicalPlanOperator child, QueryHeap queryHeap, DataType[] columnTypes, int estimatedCardinality,
 			int[] sortColumns, boolean[] columnsAscending) {
-		throw new UnsupportedOperationException("Method not yet supported");
+		return new SortOperatorClass(child, queryHeap, columnTypes, estimatedCardinality, sortColumns, columnsAscending);
 	}
 
 	@Override
 	public GroupByOperator createGroupByOperator(PhysicalPlanOperator child, int[] groupColumnIndices, int[] aggColumnIndices,
 			AggregationType[] aggregateFunctions, DataType[] aggColumnTypes, int[] groupColumnOutputPositions, int[] aggregateColumnOutputPosition) {
-		throw new UnsupportedOperationException("Method not yet supported");
+		return new GroupByOperatorClass(child, groupColumnIndices, aggColumnIndices, aggregateFunctions, aggColumnTypes, groupColumnOutputPositions, aggregateColumnOutputPosition);
 	}
 
 	@Override
 	public MergeJoinOperator createMergeJoinOperator(PhysicalPlanOperator leftChild, PhysicalPlanOperator rightChild, int[] leftJoinColumns,
 			int[] rightJoinColumns, int[] columnMapLeftTuple, int[] columnMapRightTuple) {
-		throw new UnsupportedOperationException("Method not yet supported");
+		return new MergeJoinOperatorClass(leftChild, rightChild, leftJoinColumns, rightJoinColumns, columnMapLeftTuple, columnMapRightTuple);
 	}
 
 	@Override
