@@ -131,19 +131,19 @@ public class ExtensionFactory extends AbstractExtensionFactory {
 	@Override
 	public SortOperator createSortOperator(PhysicalPlanOperator child, QueryHeap queryHeap, DataType[] columnTypes, int estimatedCardinality,
 			int[] sortColumns, boolean[] columnsAscending) {
-		return new SortOperatorImp(child, queryHeap, columnTypes, estimatedCardinality, sortColumns, columnsAscending);
+		return new SortOperatorClass(child, queryHeap, columnTypes, estimatedCardinality, sortColumns, columnsAscending);
 	}
 
 	@Override
 	public GroupByOperator createGroupByOperator(PhysicalPlanOperator child, int[] groupColumnIndices, int[] aggColumnIndices,
 			AggregationType[] aggregateFunctions, DataType[] aggColumnTypes, int[] groupColumnOutputPositions, int[] aggregateColumnOutputPosition) {
-		return new GroupByOperatorImpl(child, groupColumnIndices, aggColumnIndices, aggregateFunctions, aggColumnTypes, groupColumnOutputPositions, aggregateColumnOutputPosition);
+		return new GroupByOperatorClass(child, groupColumnIndices, aggColumnIndices, aggregateFunctions, aggColumnTypes, groupColumnOutputPositions, aggregateColumnOutputPosition);
 	}
 
 	@Override
 	public MergeJoinOperator createMergeJoinOperator(PhysicalPlanOperator leftChild, PhysicalPlanOperator rightChild, int[] leftJoinColumns,
 			int[] rightJoinColumns, int[] columnMapLeftTuple, int[] columnMapRightTuple) {
-		return new MergeJoinOperatorImpl(leftChild, rightChild, leftJoinColumns, rightJoinColumns, columnMapLeftTuple, columnMapRightTuple);
+		return new MergeJoinOperatorClass(leftChild, rightChild, leftJoinColumns, rightJoinColumns, columnMapLeftTuple, columnMapRightTuple);
 	}
 
 	@Override

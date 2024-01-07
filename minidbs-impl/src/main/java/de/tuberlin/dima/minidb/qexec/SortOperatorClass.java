@@ -10,7 +10,7 @@ import de.tuberlin.dima.minidb.qexec.heap.QueryHeapException;
 import java.io.IOException;
 import java.util.*;
 
-public class SortOperatorImp implements SortOperator {
+public class SortOperatorClass implements SortOperator {
     private PhysicalPlanOperator child;
 
     private QueryHeap queryHeap;
@@ -33,8 +33,9 @@ public class SortOperatorImp implements SortOperator {
     private Comparator<DataTuple> multiFieldComparator;
     private Iterator<DataTuple> lastListIterator;
 
+    private boolean opened;
 
-    public SortOperatorImp(PhysicalPlanOperator child, QueryHeap queryHeap, DataType[] columnTypes, int estimatedCardinality, int[] sortColumns, boolean[] columnsAscending) {
+    public SortOperatorClass(PhysicalPlanOperator child, QueryHeap queryHeap, DataType[] columnTypes, int estimatedCardinality, int[] sortColumns, boolean[] columnsAscending) {
         this.child = child;
         this.queryHeap = queryHeap;
         this.columnTypes = columnTypes;
@@ -73,23 +74,29 @@ public class SortOperatorImp implements SortOperator {
         }
         this.sorted = false;
         this.multiFieldComparator = this.getMultiFieldComparator(this.sortColumns, this.columnsAscending);
+        this.opened=true;
     }
 
 
 
     @Override
     public DataTuple next() throws QueryExecutionException {
+
+        if(!opened){
+            throw new QueryExecutionException("Operator is not yet opened");
+        }
         try {
             if(!this.sorted) {
                 DataTuple nextChildTuple = this.child.next();
                 int maximumCardinality;
                 int sortIndex = 0;
                 DataTuple[] subList;
-
                 boolean heapUsed = false;
                 subList = this.queryHeap.getSortArray(this.queryHeapId);
                 maximumCardinality = this.queryHeap.getMaximalTuplesForInternalSort(this.queryHeapId);
                 while (nextChildTuple != null) {
+
+
                     if (sortIndex < maximumCardinality) {
                         subList[sortIndex] = nextChildTuple;
                         sortIndex++;
@@ -113,23 +120,26 @@ public class SortOperatorImp implements SortOperator {
                 this.tupleIterators = tupleIterators;
                 this.sortedMinList = new DataTuple[tupleIterators.length + 1];
 
-                for (int i = 0; i < tupleIterators.length; i++) {
+                for (int i = 0; i < sortedMinList.length; i++) {
 
-
-                    ExternalTupleSequenceIterator tupleIterator = tupleIterators[i];
-                    if (tupleIterator.hasNext()) {
-                        this.sortedMinList[i] = tupleIterator.next();
-                    } else {
-                        this.sortedMinList[i] = null;
-                    }
-                    if(i ==tupleIterators.length - 1 ){
-
+                    if(i ==sortedMinList.length - 1 ){
                         if(this.lastListIterator.hasNext()){
-                            this.sortedMinList[i+1] = lastListIterator.next();
+
+                            this.sortedMinList[i] = lastListIterator.next();
                         } else {
-                            this.sortedMinList[i+1] = null;
+                            this.sortedMinList[i] = null;
                         }
                     }
+                    else{
+                        ExternalTupleSequenceIterator tupleIterator = tupleIterators[i];
+                        if (tupleIterator.hasNext()) {
+                            this.sortedMinList[i] = tupleIterator.next();
+                        } else {
+                            this.sortedMinList[i] = null;
+                        }
+                    }
+
+
                 }
                 this.sorted = true;
             }
@@ -155,6 +165,7 @@ public class SortOperatorImp implements SortOperator {
                 }
 
             }
+
             return minTuple;
             } catch (QueryHeapException | IOException e) {
                 throw new QueryExecutionException(e);
