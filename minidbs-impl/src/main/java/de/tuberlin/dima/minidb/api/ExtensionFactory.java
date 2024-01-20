@@ -20,16 +20,20 @@ import de.tuberlin.dima.minidb.io.tables.TableResourceManager;
 import de.tuberlin.dima.minidb.mapred.TableInputFormat;
 import de.tuberlin.dima.minidb.mapred.qexec.BulkProcessingOperator;
 import de.tuberlin.dima.minidb.mapred.qexec.HadoopOperator;
+import de.tuberlin.dima.minidb.optimizer.OptimizerPlanOperator;
 import de.tuberlin.dima.minidb.optimizer.cardinality.CardinalityEstimator;
 import de.tuberlin.dima.minidb.optimizer.cost.CostEstimator;
 import de.tuberlin.dima.minidb.optimizer.generator.PhysicalPlanGenerator;
 import de.tuberlin.dima.minidb.optimizer.joins.JoinOrderOptimizer;
+import de.tuberlin.dima.minidb.optimizer.joins.JoinOrderOptimizerClass;
 import de.tuberlin.dima.minidb.parser.OutputColumn.AggregationType;
 import de.tuberlin.dima.minidb.parser.SQLParser;
 import de.tuberlin.dima.minidb.qexec.*;
 import de.tuberlin.dima.minidb.qexec.heap.QueryHeap;
 import de.tuberlin.dima.minidb.qexec.predicate.JoinPredicate;
 import de.tuberlin.dima.minidb.qexec.predicate.LocalPredicate;
+import de.tuberlin.dima.minidb.semantics.JoinGraphEdge;
+import de.tuberlin.dima.minidb.semantics.Relation;
 import de.tuberlin.dima.minidb.semantics.SelectQueryAnalyzer;
 import de.tuberlin.dima.minidb.warm_up.Sort;
 import de.tuberlin.dima.minidb.warm_up.SortImpl;
@@ -148,7 +152,8 @@ public class ExtensionFactory extends AbstractExtensionFactory {
 
 	@Override
 	public JoinOrderOptimizer createJoinOrderOptimizer(CardinalityEstimator estimator) {
-		throw new UnsupportedOperationException("Method not yet supported");
+		return new JoinOrderOptimizerClass(estimator);
+
 	}
 
 	@Override

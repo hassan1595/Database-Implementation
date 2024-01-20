@@ -47,7 +47,8 @@ import de.tuberlin.dima.minidb.semantics.predicate.LocalPredicateBetween;
 import de.tuberlin.dima.minidb.semantics.solution.SelectQueryAnalyzerImpl;
 import de.tuberlin.dima.minidb.parser.solution.SQLParserImpl;
 
-public class TestJoinOrderOptimizerStudents
+public class
+TestJoinOrderOptimizerStudents
 {
 	/**
 	 * Location of the configuration file for the database instance.
