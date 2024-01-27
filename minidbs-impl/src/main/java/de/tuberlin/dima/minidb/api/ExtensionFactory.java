@@ -23,6 +23,7 @@ import de.tuberlin.dima.minidb.mapred.qexec.HadoopOperator;
 import de.tuberlin.dima.minidb.optimizer.OptimizerPlanOperator;
 import de.tuberlin.dima.minidb.optimizer.cardinality.CardinalityEstimator;
 import de.tuberlin.dima.minidb.optimizer.cost.CostEstimator;
+import de.tuberlin.dima.minidb.optimizer.cost.CostEstimatorClass;
 import de.tuberlin.dima.minidb.optimizer.generator.PhysicalPlanGenerator;
 import de.tuberlin.dima.minidb.optimizer.joins.JoinOrderOptimizer;
 import de.tuberlin.dima.minidb.optimizer.joins.JoinOrderOptimizerClass;
@@ -163,7 +164,7 @@ public class ExtensionFactory extends AbstractExtensionFactory {
 
 	@Override
 	public CostEstimator createCostEstimator(long readCost, long writeCost, long randomReadOverhead, long randomWriteOverhead) {
-		throw new UnsupportedOperationException("Method not yet supported");
+		return  new CostEstimatorClass(readCost, writeCost, randomReadOverhead,randomWriteOverhead );
 	}
 
 	@Override
