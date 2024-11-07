@@ -25,6 +25,7 @@ import de.tuberlin.dima.minidb.optimizer.cardinality.CardinalityEstimator;
 import de.tuberlin.dima.minidb.optimizer.cost.CostEstimator;
 import de.tuberlin.dima.minidb.optimizer.cost.CostEstimatorClass;
 import de.tuberlin.dima.minidb.optimizer.generator.PhysicalPlanGenerator;
+import de.tuberlin.dima.minidb.optimizer.generator.PhysicalPlanGeneratorClass;
 import de.tuberlin.dima.minidb.optimizer.joins.JoinOrderOptimizer;
 import de.tuberlin.dima.minidb.optimizer.joins.JoinOrderOptimizerClass;
 import de.tuberlin.dima.minidb.parser.OutputColumn.AggregationType;
@@ -169,7 +170,7 @@ public class ExtensionFactory extends AbstractExtensionFactory {
 
 	@Override
 	public PhysicalPlanGenerator createPhysicalPlanGenerator(Catalogue catalogue, CardinalityEstimator cardEstimator, CostEstimator costEstimator) {
-		throw new UnsupportedOperationException("Method not yet supported");
+		return new PhysicalPlanGeneratorClass(catalogue, cardEstimator, costEstimator);
 	}
 
 	/* (non-Javadoc)

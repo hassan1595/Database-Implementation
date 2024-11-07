@@ -69,7 +69,7 @@ public class CostEstimatorClass implements  CostEstimator{
         long numberReadPagesFetch = getNumberReadPagesFetch(fetchedTable, cardinality);
         double randomRatio = 1 - ( ((double) numberReadPagesFetch/(double)fetchedTable.getStatistics().getNumberOfPages()) * ((double) 7)/(double) 8);
         if(sequential){
-            
+
         return numberReadPagesFetch * (this.readCost + (long)(this.randomReadOverhead * randomRatio));
 
         }
